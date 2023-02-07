@@ -1,5 +1,6 @@
 package fr.chatavion.server.dns;
 
+import fr.chatavion.server.dns.error.DnsException;
 import fr.chatavion.server.dns.util.Community;
 import org.apache.commons.codec.binary.Base32;
 import org.xbill.DNS.*;
@@ -7,16 +8,16 @@ import fr.chatavion.server.dns.record.RecordType;
 import org.xbill.DNS.Record;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 public class MockDNS {
 
-    private final static Logger logger = Logger.getLogger(MockDNS.class.getName());
+    private static final Logger logger = Logger.getLogger(MockDNS.class.getName());
 
     private Thread thread = null;
     private volatile boolean running = false;
@@ -38,7 +39,7 @@ public class MockDNS {
                 serve();
             } catch (IOException ex) {
                 stop();
-                throw new RuntimeException(ex);
+                throw new UncheckedIOException(ex);
             }
         });
         thread.start();
@@ -55,11 +56,15 @@ public class MockDNS {
         DatagramSocket socket = new DatagramSocket(port);
         logger.info("Socket created...");
         while (running) {
-            process(socket);
+            try {
+                process(socket);
+            } catch (DnsException e) {
+                logger.severe(() -> "Problem with uri on server. Contact an administrator.");
+            }
         }
     }
 
-    private void process(DatagramSocket socket) throws IOException {
+    private void process(DatagramSocket socket) throws IOException, DnsException {
         byte[] in = new byte[UDP_SIZE];
 
         logger.info("waiting for dns request...");
@@ -67,7 +72,7 @@ public class MockDNS {
         DatagramPacket indp = new DatagramPacket(in, UDP_SIZE);
         socket.receive(indp);
         ++requestCount;
-        logger.info(String.format("processing... %d", requestCount));
+        logger.info(() -> "processing... " + requestCount);
 
         // Build the response
         Message request = new Message(in);
@@ -96,7 +101,7 @@ public class MockDNS {
         if(test) {
             byte[] resp = response.toWire();
             DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
-            logger.info("sending... " + requestCount);
+            logger.info(() -> "sending... " + requestCount);
             socket.send(outdp);
         }
     }
@@ -140,12 +145,8 @@ public class MockDNS {
             logger.warning("Someone try to access a non existing community.");
             return false;
         }
-        try {
-            community.addMessage(pseudo, message);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        logger.info("UTF-8 > " + cm + ": " + pseudo + " - " + message);
+        community.addMessage(pseudo, message);
+        logger.info(() -> "UTF-8 > " + cm + ": " + pseudo + " - " + message);
         response.addRecord(Record.fromString(msg, Type.A, DClass.IN, 86400, "42.42.42.42", Name.root), Section.ANSWER);
         return true;
     }
