@@ -62,6 +62,7 @@ public class MockDNS {
     private void process(DatagramSocket socket) throws IOException {
         byte[] in = new byte[UDP_SIZE];
 
+        logger.info("waiting for dns request...");
         // Read the request
         DatagramPacket indp = new DatagramPacket(in, UDP_SIZE);
         socket.receive(indp);
@@ -75,61 +76,69 @@ public class MockDNS {
 
         var msg = request.getQuestion().getName();
 
-        // Add answers as needed (depending on the type of request)
-        if("connection".equals(msg.getLabelString(0))) {
-            logger.info("Type requête");
-
-            // TODO add id dynamic per community ? Idk how tho
-            RecordType.typeConnection(request.getQuestion().getType(), response, msg);
-
-        }
-        else if("m".equals(msg.getLabelString(1).charAt(0) + "")) {// starts with m: assume recv request
-            logger.info("Historique");
-
-            String cm = new String(converter32.decode(msg.getLabelString(0).getBytes()));
-            var community = Community.findCommunity(cm);
-            if(community == null) {
-                logger.warning("Someone try to access a non existing community.");
-                return;
+        var test = switch (msg.getLabelString(1)) {
+            case "connexion" -> {
+                logger.info("Connexion");
+                // TODO Verify existance of community
+                // TODO Return id of the latest message in logs
+                yield RecordType.typeConnection(request.getQuestion().getType(), response, msg);
             }
-
-            var val = msg.getLabelString(1);
-            val = val.replace("m", "");
-            var findO = val.indexOf("o");
-            var findN = val.indexOf("n");
-
-            Optional<String> message;
-            if(findO != -1) {
-                message = community.getMessage(Integer.parseInt(val.substring(0, findO)));
-            } else if (findN != -1) {
-                message = community.getMessage(Integer.parseInt(val.substring(0, findN)));
-            } else {
-                message = community.getMessage(Integer.parseInt(val));
+            case "historique" -> {
+                logger.info("Historique");
+                yield getHistorique(request, response, msg);
             }
-            if(message.isPresent()) {
-                var rsp = converter32.encode(message.get().getBytes(StandardCharsets.UTF_8));
-                RecordType.sendHistorique(request.getQuestion().getType(), response, msg, rsp);
+            case "message" -> {
+                logger.info("Message");
+                yield registerMessage(response, msg);
             }
-        }
-        else {
-            logger.info("Message");
-            registerMessage(response, msg);
-        }
+        };
 
-        byte[] resp = response.toWire();
-        DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
-        logger.info("sending... " + requestCount);
-        socket.send(outdp);
+        if(test) {
+            byte[] resp = response.toWire();
+            DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
+            logger.info("sending... " + requestCount);
+            socket.send(outdp);
+        }
     }
 
-    private static void registerMessage(Message response, Name msg) throws IOException {
+    private static boolean getHistorique(Message request, Message response, Name msg) throws IOException {
+        // TODO Change to get the pattern
+        // community token id
+        String cm = new String(converter32.decode(msg.getLabelString(0).getBytes()));
+        var community = Community.findCommunity(cm);
+        if (community == null) {
+            logger.warning("Someone try to access a non existing community.");
+            return false;
+        }
+
+        var val = msg.getLabelString(0);
+        val = val.replace("m", "");
+        var findO = val.indexOf("o");
+        var findN = val.indexOf("n");
+
+        Optional<String> message;
+        if (findO != -1) {
+            message = community.getMessage(Integer.parseInt(val.substring(0, findO)));
+        } else if (findN != -1) {
+            message = community.getMessage(Integer.parseInt(val.substring(0, findN)));
+        } else {
+            message = community.getMessage(Integer.parseInt(val));
+        }
+        if (message.isPresent()) {
+            var rsp = converter32.encode(message.get().getBytes(StandardCharsets.UTF_8));
+            return RecordType.sendHistorique(request.getQuestion().getType(), response, msg, rsp);
+        }
+        return false;
+    }
+
+    private static boolean registerMessage(Message response, Name msg) throws IOException {
         var cm = new String(converter32.decode(msg.getLabelString(0).getBytes()));
         var pseudo = new String(converter32.decode(msg.getLabelString(1).getBytes()));
         var message = new String(converter32.decode(msg.getLabelString(2).getBytes()));
         var community = Community.findCommunity(cm);
         if(community == null) {
             logger.warning("Someone try to access a non existing community.");
-            return;
+            return false;
         }
         try {
             community.addMessage(pseudo, message);
@@ -138,5 +147,6 @@ public class MockDNS {
         }
         logger.info("UTF-8 > " + cm + ": " + pseudo + " - " + message);
         response.addRecord(Record.fromString(msg, Type.A, DClass.IN, 86400, "42.42.42.42", Name.root), Section.ANSWER);
+        return true;
     }
 }

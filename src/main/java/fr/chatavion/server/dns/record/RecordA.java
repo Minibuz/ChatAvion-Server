@@ -8,7 +8,7 @@ import java.io.IOException;
 public class RecordA implements RecordType {
 
     @Override
-    public void sendHistorique(Message response, Name msg, byte[] rsp) throws IOException {
+    public boolean sendHistorique(Message response, Name msg, byte[] rsp) throws IOException {
         StringBuilder rspIpv4 = new StringBuilder();
         for (byte code : rsp) {
             rspIpv4.append(code);
@@ -22,13 +22,15 @@ public class RecordA implements RecordType {
                             Name.root),
                     Section.ANSWER);
         }
+        return true;
     }
 
     @Override
-    public void connection(Message response, Name msg) throws IOException {
+    public boolean connection(Message response, Name msg) throws IOException {
         response.addRecord(
                 Record.fromString(msg, Type.A, DClass.IN, 86400, "0.0.0.0", Name.root),
                 Section.ANSWER
         );
+        return true;
     }
 }
