@@ -53,13 +53,14 @@ public class MockDNS {
 
     private void serve() throws IOException {
         logger.info("Creating socket...");
-        DatagramSocket socket = new DatagramSocket(port);
-        logger.info("Socket created...");
-        while (running) {
-            try {
-                process(socket);
-            } catch (DnsException e) {
-                logger.severe(() -> "Problem with uri on server. Contact an administrator.");
+        try (DatagramSocket socket = new DatagramSocket(port)) {
+            logger.info("Socket created...");
+            while (running) {
+                try {
+                    process(socket);
+                } catch (DnsException e) {
+                    logger.severe(() -> "Problem with uri on server. Contact an administrator.");
+                }
             }
         }
     }
