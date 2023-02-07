@@ -88,11 +88,13 @@ public class MockDNS {
                 logger.info("Historique");
                 yield getHistorique(request, response, msg);
             }
-            case "message" -> {
-                logger.info("Message");
-                yield registerMessage(response, msg);
+            default -> {
+                if(msg.labels() > 4 && "message".equals(msg.getLabelString(3))) {
+                    logger.info("Message");
+                    yield registerMessage(response, msg);
+                }
+                yield false;
             }
-            default -> false;
         };
 
         if(test) {
