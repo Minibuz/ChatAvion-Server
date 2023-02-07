@@ -63,7 +63,6 @@ public class MockDNS {
     private void process(DatagramSocket socket) throws IOException {
         byte[] in = new byte[UDP_SIZE];
 
-        logger.info("waiting for dns request...");
         // Read the request
         DatagramPacket indp = new DatagramPacket(in, UDP_SIZE);
         socket.receive(indp);
@@ -77,30 +76,39 @@ public class MockDNS {
 
         var msg = request.getQuestion().getName();
 
-        var test = switch (msg.getLabelString(1)) {
+        switch (msg.getLabelString(1)) {
             case "connexion" -> {
                 logger.info("Connexion");
-                // TODO Verify existance of community
-                // TODO Return id of the latest message in logs
-                yield RecordType.typeConnection(request.getQuestion().getType(), response, msg);
+
+                String name = msg.getLabelString(0);
+                if(Community.findCommunity(name) != null) {
+                    RecordType.typeConnection(request.getQuestion().getType(), response, msg);
+                }
             }
             case "historique" -> {
+                // TODO modify
                 logger.info("Historique");
-                yield getHistorique(request, response, msg);
+                getHistorique(request, response, msg);
             }
-            case "message" -> {
-                logger.info("Message");
-                yield registerMessage(response, msg);
+            default -> {
+                if(msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equals(msg.getLabelString(3))) {
+                    logger.info("Message");
+                    registerMessage(response, msg);
+                } else {
+                    response.addRecord(Record.fromString(msg, Type.A, DClass.IN, 3600, "42.42.42.42", Name.root), Section.ANSWER);
+                }
             }
-            default -> false;
-        };
-
-        if(test) {
-            byte[] resp = response.toWire();
-            DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
-            logger.info(() -> "sending... " + requestCount);
-            socket.send(outdp);
         }
+
+        System.out.println(request);
+        System.out.println(indp.getAddress() + " : " + indp.getPort());
+        response.getHeader().setFlag(Flags.QR);
+        System.out.println(response);
+
+        byte[] resp = response.toWire();
+        DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
+        logger.info(() -> "sending... " + requestCount);
+        socket.send(outdp);
     }
 
     private static boolean getHistorique(Message request, Message response, Name msg) throws IOException {
@@ -144,7 +152,7 @@ public class MockDNS {
         }
         community.addMessage(pseudo, message);
         logger.info(() -> "UTF-8 > " + cm + ": " + pseudo + " - " + message);
-        response.addRecord(Record.fromString(msg, Type.A, DClass.IN, 86400, "42.42.42.42", Name.root), Section.ANSWER);
+        response.addRecord(Record.fromString(msg, Type.A, DClass.IN, 3600, "42.42.42.42", Name.root), Section.ANSWER);
         return true;
     }
 }

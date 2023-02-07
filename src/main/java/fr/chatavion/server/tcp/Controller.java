@@ -1,4 +1,4 @@
-package fr.chatavion.server;
+package fr.chatavion.server.tcp;
 
 
 import org.springframework.web.bind.annotation.GetMapping;
