@@ -1,6 +1,5 @@
 package fr.chatavion.server.dns;
 
-import fr.chatavion.server.dns.error.DnsException;
 import fr.chatavion.server.dns.util.Community;
 import org.apache.commons.codec.binary.Base32;
 import org.xbill.DNS.*;
@@ -32,7 +31,7 @@ public class MockDNS {
     }
 
     public void start() {
-        logger.info("Server starting on port " + this.port);
+        logger.info(() -> "Server starting on port " + this.port);
         running = true;
         thread = new Thread(() -> {
             try {
@@ -56,16 +55,12 @@ public class MockDNS {
         try (DatagramSocket socket = new DatagramSocket(port)) {
             logger.info("Socket created...");
             while (running) {
-                try {
-                    process(socket);
-                } catch (DnsException e) {
-                    logger.severe(() -> "Problem with uri on server. Contact an administrator.");
-                }
+                process(socket);
             }
         }
     }
 
-    private void process(DatagramSocket socket) throws IOException, DnsException {
+    private void process(DatagramSocket socket) throws IOException {
         byte[] in = new byte[UDP_SIZE];
 
         logger.info("waiting for dns request...");
