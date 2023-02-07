@@ -9,7 +9,7 @@ public class RecordAAAA implements RecordType {
 
 
     @Override
-    public void sendHistorique(Message response, Name msg, byte[] rsp) throws IOException {
+    public boolean sendHistorique(Message response, Name msg, byte[] rsp) throws IOException {
         StringBuilder rspIpv6 = new StringBuilder();
         for (byte code : rsp) {
             rspIpv6.append(code);
@@ -24,13 +24,15 @@ public class RecordAAAA implements RecordType {
                             Name.root),
                     Section.ANSWER);
         }
+        return true;
     }
 
     @Override
-    public void connection(Message response, Name msg) throws IOException {
+    public boolean connection(Message response, Name msg) throws IOException {
         response.addRecord(
                 Record.fromString(msg, Type.AAAA, DClass.IN, 86400, "0:0:0:0:0:0:0:0", Name.root),
                 Section.ANSWER
         );
+        return true;
     }
 }

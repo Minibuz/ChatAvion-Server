@@ -8,23 +8,25 @@ import java.io.IOException;
 
 public interface RecordType {
 
-    void sendHistorique(Message response, Name msg, byte[] rsp) throws IOException;
+    boolean sendHistorique(Message response, Name msg, byte[] rsp) throws IOException;
 
-    void connection(Message response, Name msg) throws IOException;
+    boolean connection(Message response, Name msg) throws IOException;
 
-    static void sendHistorique(int type, Message response, Name msg, byte[] rsp) throws IOException {
-        switch (type) {
+    static boolean sendHistorique(int type, Message response, Name msg, byte[] rsp) throws IOException {
+        return switch (type) {
             case Type.A -> new RecordA().sendHistorique(response, msg, rsp);
             case Type.AAAA -> new RecordAAAA().sendHistorique(response, msg, rsp);
             case Type.TXT -> new RecordTXT().sendHistorique(response, msg, rsp);
-        }
+            default -> false;
+        };
     }
 
-    static void typeConnection(int type, Message response, Name msg) throws IOException {
-        switch (type) {
+    static boolean typeConnection(int type, Message response, Name msg) throws IOException {
+        return switch (type) {
             case Type.A -> new RecordA().connection(response, msg);
             case Type.AAAA -> new RecordAAAA().connection(response, msg);
             case Type.TXT -> new RecordTXT().connection(response, msg);
-        }
+            default -> false;
+        };
     }
 }
