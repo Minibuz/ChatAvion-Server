@@ -56,7 +56,6 @@ public class Community {
         try {
             Files.write(this.getPathLog(),(LocalDateTime.now() + "@" + username + " : " + message + "\n").getBytes(), StandardOpenOption.APPEND);
         } catch (IOException e) {
-            // TODO : Do something here
             throw new UncheckedIOException(e);
         }
     }
