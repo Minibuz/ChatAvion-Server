@@ -96,6 +96,7 @@ public class MockDNS {
                 logger.info("Message");
                 yield registerMessage(response, msg);
             }
+            default -> false;
         };
 
         if(test) {
