@@ -76,28 +76,24 @@ public class MockDNS {
 
         var msg = request.getQuestion().getName();
 
-        switch (msg.getLabelString(1)) {
-            case "connexion" -> {
-                logger.info("Connexion");
+        var treatment = msg.getLabelString(1);
+        if("connexion".equals(treatment)) {
+            logger.info("Connexion");
 
-                String name = msg.getLabelString(0);
-                if(Community.findCommunity(name) != null) {
-                    RecordType.typeConnection(request.getQuestion().getType(), response, msg);
-                }
+            if(Community.findCommunity(msg.getLabelString(0)) != null) {
+                RecordType.typeConnection(request.getQuestion().getType(), response, msg);
             }
-            case "historique" -> {
-                // TODO modify
-                logger.info("Historique");
-                getHistorique(request, response, msg);
-            }
-            default -> {
-                if(msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equals(msg.getLabelString(3))) {
-                    logger.info("Message");
-                    registerMessage(response, msg);
-                } else {
-                    response.addRecord(Record.fromString(msg, Type.A, DClass.IN, 3600, "42.42.42.42", Name.root), Section.ANSWER);
-                }
-            }
+        }
+        if(treatment.contains("historique")) {
+            // TODO modify
+            logger.info("Historique");
+
+            getHistorique(request, response, msg);
+        }
+        if(msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equals(msg.getLabelString(3))) {
+            logger.info("Message");
+
+            registerMessage(response, msg);
         }
 
         System.out.println(request);
@@ -112,16 +108,17 @@ public class MockDNS {
     }
 
     private static boolean getHistorique(Message request, Message response, Name msg) throws IOException {
-        // TODO Change to get the pattern
-        // community token id
-        String cm = new String(converter32.decode(msg.getLabelString(0).getBytes()));
+        logger.info(msg.getLabelString(0));
+        String[] cmAndId = msg.getLabelString(0).split("-");
+        var cmB32 = cmAndId[1];
+        var cm = new String(converter32.decode(cmB32.getBytes()));
         var community = Community.findCommunity(cm);
         if (community == null) {
             logger.warning("Someone try to access a non existing community.");
             return false;
         }
 
-        var val = msg.getLabelString(0);
+        var val = cmAndId[0];
         val = val.replace("m", "");
         var findO = val.indexOf("o");
         var findN = val.indexOf("n");
@@ -147,7 +144,7 @@ public class MockDNS {
         var message = new String(converter32.decode(msg.getLabelString(2).getBytes()));
         var community = Community.findCommunity(cm);
         if(community == null) {
-            logger.warning("Someone try to access a non existing community.");
+            logger.warning(() -> "Someone try to access a non existing community : " + cm);
             return false;
         }
         community.addMessage(pseudo, message);
