@@ -16,11 +16,11 @@ public class RecordAAAA implements RecordType {
             rspIpv6.append(':');
         }
         String[] part = rspIpv6.substring(0, rspIpv6.length() - 1).split(":");
-        for (int i = 0; i < part.length; i += 8) {
+        for (int i = 0; i < part.length; i += 7) {
             response.addRecord(
                     Record.fromString(msg, Type.AAAA, DClass.IN, 3600,
-                            part[i] + ":" + part[i + 1] + ":" + part[i + 2] + ":" + part[i + 3] +
-                                    ":" + part[i + 4] + ":" + part[i + 5] + ":" + part[i + 6] + ":" + part[i + 7],
+                            i + ":" + part[i] + ":" + part[i + 1] + ":" + part[i + 2] +
+                                    ":" + part[i + 3] + ":" + part[i + 4] + ":" + part[i + 5] + ":" + part[i + 6],
                             Name.root),
                     Section.ANSWER);
         }
