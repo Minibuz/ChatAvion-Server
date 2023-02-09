@@ -15,10 +15,24 @@ public class RecordA implements RecordType {
             rspIpv4.append('.');
         }
         String[] part = rspIpv4.substring(0, rspIpv4.length() - 1).split("\\.");
-        for (int i = 0; i < part.length; i += 3) {
+        for (int i = 0; i < part.length - part.length%3; i += 3) {
             response.addRecord(
                     Record.fromString(msg, Type.A, DClass.IN, 600,
                             i + "." + part[i] + "." + part[i + 1] + "." + part[i + 2],
+                            Name.root),
+                    Section.ANSWER);
+        }
+        if(part.length%3 == 1) {
+            response.addRecord(
+                    Record.fromString(msg, Type.A, DClass.IN, 600,
+                            part.length-1 + "." + part[part.length-1] + ".0.0",
+                            Name.root),
+                    Section.ANSWER);
+        }
+        if(part.length%3 == 2) {
+            response.addRecord(
+                    Record.fromString(msg, Type.A, DClass.IN, 600,
+                            part.length-2 + "." + part[part.length-2] + "." + part[part.length-1] + ".0",
                             Name.root),
                     Section.ANSWER);
         }
