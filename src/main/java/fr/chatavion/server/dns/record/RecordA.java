@@ -17,7 +17,7 @@ public class RecordA implements RecordType {
         String[] part = rspIpv4.substring(0, rspIpv4.length() - 1).split("\\.");
         for (int i = 0; i < part.length; i += 4) {
             response.addRecord(
-                    Record.fromString(msg, Type.A, DClass.IN, 86400,
+                    Record.fromString(msg, Type.A, DClass.IN, 600,
                             part[i] + "." + part[i + 1] + "." + part[i + 2] + "." + part[i + 3],
                             Name.root),
                     Section.ANSWER);
@@ -28,7 +28,7 @@ public class RecordA implements RecordType {
     @Override
     public boolean connection(Message response, Name msg) throws IOException {
         response.addRecord(
-                Record.fromString(msg, Type.A, DClass.IN, 86400, "0.0.0.0", Name.root),
+                Record.fromString(msg, Type.A, DClass.IN, 600, "0.0.0.0", Name.root),
                 Section.ANSWER
         );
         return true;

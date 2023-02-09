@@ -18,7 +18,7 @@ public class RecordAAAA implements RecordType {
         String[] part = rspIpv6.substring(0, rspIpv6.length() - 1).split(":");
         for (int i = 0; i < part.length; i += 8) {
             response.addRecord(
-                    Record.fromString(msg, Type.AAAA, DClass.IN, 86400,
+                    Record.fromString(msg, Type.AAAA, DClass.IN, 3600,
                             part[i] + ":" + part[i + 1] + ":" + part[i + 2] + ":" + part[i + 3] +
                                     ":" + part[i + 4] + ":" + part[i + 5] + ":" + part[i + 6] + ":" + part[i + 7],
                             Name.root),
@@ -30,7 +30,7 @@ public class RecordAAAA implements RecordType {
     @Override
     public boolean connection(Message response, Name msg) throws IOException {
         response.addRecord(
-                Record.fromString(msg, Type.AAAA, DClass.IN, 86400, "0:0:0:0:0:0:0:0", Name.root),
+                Record.fromString(msg, Type.AAAA, DClass.IN, 3600, "0:0:0:0:0:0:0:0", Name.root),
                 Section.ANSWER
         );
         return true;
