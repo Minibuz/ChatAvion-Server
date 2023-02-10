@@ -76,21 +76,20 @@ public class MockDNS {
 
         var msg = request.getQuestion().getName();
 
-        var treatment = msg.getLabelString(1);
+        var treatment = msg.getLabelString(1).toLowerCase();
         if("connexion".equals(treatment)) {
             logger.info("Connexion");
 
-            if(Community.findCommunity(msg.getLabelString(0)) != null) {
+            if(Community.findCommunity(msg.getLabelString(0).toLowerCase()) != null) {
                 RecordType.typeConnection(request.getQuestion().getType(), response, msg);
             }
         }
         if(treatment.contains("historique")) {
-            // TODO modify
             logger.info("Historique");
 
             getHistorique(request, response, msg);
         }
-        if(msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equals(msg.getLabelString(3))) {
+        if(msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equalsIgnoreCase(msg.getLabelString(3))) {
             logger.info("Message");
 
             registerMessage(response, msg);
@@ -118,7 +117,7 @@ public class MockDNS {
             return false;
         }
 
-        var val = cmAndId[0];
+        var val = cmAndId[0].toLowerCase();
         val = val.replace("m", "");
         var findO = val.indexOf("o");
         var findN = val.indexOf("n");
