@@ -25,7 +25,7 @@ public class Community {
     private final String name;
 
     Community(String name) {
-        this.name = name;
+        this.name = name.toLowerCase();
 
         try {
             Files.createFile(this.getPathLog());
@@ -41,7 +41,7 @@ public class Community {
     }
 
     public static Community findCommunity(String name) {
-        return existingCommunities.get(name);
+        return existingCommunities.get(name.toLowerCase());
     }
 
     public Optional<String> getMessage(int id) throws IOException {

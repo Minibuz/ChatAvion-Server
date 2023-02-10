@@ -24,7 +24,6 @@ public class MockDNS {
 
     private static final Base32 converter32 = new Base32();
     private final int port;
-    private int requestCount = 0;
 
     public MockDNS(int port) {
         this.port = port;
@@ -66,13 +65,13 @@ public class MockDNS {
         // Read the request
         DatagramPacket indp = new DatagramPacket(in, UDP_SIZE);
         socket.receive(indp);
-        ++requestCount;
-        logger.info(() -> "processing... " + requestCount);
+        logger.info(() -> "Processing entry...");
 
         // Build the response
         Message request = new Message(in);
         Message response = new Message(request.getHeader().getID());
         response.addRecord(request.getQuestion(), Section.QUESTION);
+        response.getHeader().setFlag(Flags.QR);
 
         var msg = request.getQuestion().getName();
 
@@ -95,19 +94,13 @@ public class MockDNS {
             registerMessage(response, msg);
         }
 
-        System.out.println(request);
-        System.out.println(indp.getAddress() + " : " + indp.getPort());
-        response.getHeader().setFlag(Flags.QR);
-        System.out.println(response);
-
         byte[] resp = response.toWire();
         DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
-        logger.info(() -> "sending... " + requestCount);
+        logger.info(() -> "sending output...");
         socket.send(outdp);
     }
 
     private static boolean getHistorique(Message request, Message response, Name msg) throws IOException {
-        logger.info(msg.getLabelString(0));
         String[] cmAndId = msg.getLabelString(0).split("-");
         var cmB32 = cmAndId[1];
         var cm = new String(converter32.decode(cmB32.getBytes()));
