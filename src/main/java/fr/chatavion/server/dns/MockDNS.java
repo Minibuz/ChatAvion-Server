@@ -73,37 +73,37 @@ public class MockDNS {
         response.addRecord(request.getQuestion(), Section.QUESTION);
         response.getHeader().setFlag(Flags.QR);
 
+        // Treat the request corresponding to the given type of request
         var msg = request.getQuestion().getName();
-
         var treatment = msg.getLabelString(1).toLowerCase();
         if("connexion".equals(treatment)) {
             logger.info("Connexion");
-
-            if(Community.findCommunity(msg.getLabelString(0).toLowerCase()) != null) {
-                RecordType.typeConnection(request.getQuestion().getType(), response, msg);
-            }
-        }
-        if(treatment.contains("historique")) {
+            communityConnexionValidation(request, response, msg);
+        } else if(treatment.contains("historique")) {
             logger.info("Historique");
-
             getHistorique(request, response, msg);
-        }
-        if(msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equalsIgnoreCase(msg.getLabelString(3))) {
+        } else if(msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equalsIgnoreCase(msg.getLabelString(3))) {
             logger.info("Message");
-
             registerMessage(response, msg);
         }
 
+        // Send the response as a packet
         byte[] resp = response.toWire();
         DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
         logger.info(() -> "sending output...");
         socket.send(outdp);
     }
 
+    private static void communityConnexionValidation(Message request, Message response, Name msg) throws IOException {
+        if(Community.findCommunity(msg.getLabelString(0).trim().toLowerCase()) != null) {
+            RecordType.typeConnection(request.getQuestion().getType(), response, msg);
+        }
+    }
+
     private static boolean getHistorique(Message request, Message response, Name msg) throws IOException {
         String[] cmAndId = msg.getLabelString(0).split("-");
         var cmB32 = cmAndId[1];
-        var cm = new String(converter32.decode(cmB32.getBytes()));
+        var cm = new String(converter32.decode(cmB32.getBytes())).trim();
         var community = Community.findCommunity(cm);
         if (community == null) {
             logger.warning("Someone try to access a non existing community.");
@@ -131,9 +131,9 @@ public class MockDNS {
     }
 
     private static boolean registerMessage(Message response, Name msg) throws IOException {
-        var cm = new String(converter32.decode(msg.getLabelString(0).getBytes()));
-        var pseudo = new String(converter32.decode(msg.getLabelString(1).getBytes()));
-        var message = new String(converter32.decode(msg.getLabelString(2).getBytes()));
+        var cm = new String(converter32.decode(msg.getLabelString(0).getBytes())).trim();
+        var pseudo = new String(converter32.decode(msg.getLabelString(1).getBytes())).trim();
+        var message = new String(converter32.decode(msg.getLabelString(2).getBytes())).trim();
         var community = Community.findCommunity(cm);
         if(community == null) {
             logger.warning(() -> "Someone try to access a non existing community : " + cm);
