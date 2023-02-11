@@ -67,31 +67,36 @@ public class MockDNS {
         socket.receive(indp);
         logger.info(() -> "Processing entry...");
 
-        // Build the response
-        Message request = new Message(in);
-        Message response = new Message(request.getHeader().getID());
-        response.addRecord(request.getQuestion(), Section.QUESTION);
-        response.getHeader().setFlag(Flags.QR);
+        try {
 
-        // Treat the request corresponding to the given type of request
-        var msg = request.getQuestion().getName();
-        var treatment = msg.getLabelString(1).toLowerCase();
-        if("connexion".equals(treatment)) {
-            logger.info("Connexion");
-            communityConnexionValidation(request, response, msg);
-        } else if(treatment.contains("historique")) {
-            logger.info("Historique");
-            getHistorique(request, response, msg);
-        } else if(msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equalsIgnoreCase(msg.getLabelString(3))) {
-            logger.info("Message");
-            registerMessage(response, msg);
+            // Build the response
+            Message request = new Message(in);
+            Message response = new Message(request.getHeader().getID());
+            response.addRecord(request.getQuestion(), Section.QUESTION);
+            response.getHeader().setFlag(Flags.QR);
+
+            // Treat the request corresponding to the given type of request
+            var msg = request.getQuestion().getName();
+            var treatment = msg.getLabelString(1).toLowerCase();
+            if ("connexion".equals(treatment)) {
+                logger.info("Connexion");
+                communityConnexionValidation(request, response, msg);
+            } else if (treatment.contains("historique")) {
+                logger.info("Historique");
+                getHistorique(request, response, msg);
+            } else if (msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equalsIgnoreCase(msg.getLabelString(3))) {
+                logger.info("Message");
+                registerMessage(response, msg);
+            }
+
+            // Send the response as a packet
+            byte[] resp = response.toWire();
+            DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
+            logger.info(() -> "sending output...");
+            socket.send(outdp);
+        } catch (WireParseException e) {
+            logger.warning(() -> "Something went wrong - " + e.getMessage());
         }
-
-        // Send the response as a packet
-        byte[] resp = response.toWire();
-        DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
-        logger.info(() -> "sending output...");
-        socket.send(outdp);
     }
 
     private static void communityConnexionValidation(Message request, Message response, Name msg) throws IOException {
