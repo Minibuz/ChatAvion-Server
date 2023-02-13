@@ -59,4 +59,10 @@ public class Community {
             throw new UncheckedIOException(e);
         }
     }
+
+    public static void createCommunity(String name) {
+        Community community = new Community(name);
+        existingCommunities.put(name, community);
+        logger.info(() -> "Community " + name + " has been created.");
+    }
 }
