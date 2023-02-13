@@ -23,7 +23,7 @@ public class Console {
                 Community.createCommunity(communityName);
             } else {
                 // Add more branch here.
-                logger.info(() -> "\"" + input + "\" isn't implemented yet.");
+                throw new IllegalStateException();
             }
         }
     }
