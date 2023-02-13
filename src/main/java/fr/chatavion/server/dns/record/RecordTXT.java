@@ -14,7 +14,7 @@ public class RecordTXT implements RecordType {
             rspTxt.append(code);
         }
         response.addRecord(
-                Record.fromString(msg, Type.TXT, DClass.IN, 3600, rspTxt.toString(), Name.root),
+                Record.fromString(msg, Type.TXT, DClass.IN, 300, rspTxt.toString(), Name.root),
                 Section.ANSWER);
         return true;
     }
@@ -22,7 +22,7 @@ public class RecordTXT implements RecordType {
     @Override
     public boolean connection(Message response, Name msg) throws IOException {
         response.addRecord(
-                Record.fromString(msg, Type.TXT, DClass.IN, 3600, "0", Name.root),
+                Record.fromString(msg, Type.TXT, DClass.IN, 86400, "0", Name.root),
                 Section.ANSWER
         );
         return true;
