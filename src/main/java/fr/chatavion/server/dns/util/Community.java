@@ -20,6 +20,7 @@ public class Community {
     private static final Map<String, Community> existingCommunities = new HashMap<>();
     static {
         existingCommunities.put("default", new Community("default"));
+        existingCommunities.put("test", new Community("test"));
     }
 
     private final String name;
