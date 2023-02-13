@@ -68,7 +68,6 @@ public class MockDNS {
         logger.info(() -> "Processing entry...");
 
         try {
-
             // Build the response
             Message request = new Message(in);
             Message response = new Message(request.getHeader().getID());
