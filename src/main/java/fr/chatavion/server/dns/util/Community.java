@@ -55,7 +55,7 @@ public class Community {
 
     public void addMessage(String username, String message) {
         try {
-            Files.write(this.getPathLog(),(LocalDateTime.now() + "@" + username + " : " + message + "\n").getBytes(), StandardOpenOption.APPEND);
+            Files.write(this.getPathLog(),(LocalDateTime.now() + "@" + username + ":::" + message + "\n").getBytes(), StandardOpenOption.APPEND);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
