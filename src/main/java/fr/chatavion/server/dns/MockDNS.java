@@ -75,7 +75,11 @@ public class MockDNS {
             response.getHeader().setFlag(Flags.QR);
 
             // Treat the request corresponding to the given type of request
-            var msg = request.getQuestion().getName();
+            var question = request.getQuestion();
+            if(question == null) {
+                return;
+            }
+            var msg = question.getName();
             var treatment = msg.getLabelString(1).toLowerCase();
             if ("connexion".equals(treatment)) {
                 logger.info("Connexion");
