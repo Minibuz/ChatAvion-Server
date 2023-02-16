@@ -80,6 +80,9 @@ public class MockDNS {
                 return;
             }
             var msg = question.getName();
+            if(msg.labels()<4) {
+                return;
+            }
             var treatment = msg.getLabelString(1).toLowerCase();
             if ("connexion".equals(treatment)) {
                 logger.info("Connexion");
