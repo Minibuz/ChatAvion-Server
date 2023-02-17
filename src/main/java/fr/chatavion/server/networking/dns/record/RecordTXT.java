@@ -1,4 +1,4 @@
-package fr.chatavion.server.dns.record;
+package fr.chatavion.server.networking.dns.record;
 
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;

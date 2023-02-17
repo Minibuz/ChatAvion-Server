@@ -1,7 +1,7 @@
 package fr.chatavion.server;
 
 import fr.chatavion.server.admin.Console;
-import fr.chatavion.server.dns.MockDNS;
+import fr.chatavion.server.networking.dns.MockDNS;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

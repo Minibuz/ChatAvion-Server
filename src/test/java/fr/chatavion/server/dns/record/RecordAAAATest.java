@@ -1,5 +1,6 @@
 package fr.chatavion.server.dns.record;
 
+import fr.chatavion.server.networking.dns.record.RecordType;
 import org.apache.commons.codec.binary.Base32;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.*;

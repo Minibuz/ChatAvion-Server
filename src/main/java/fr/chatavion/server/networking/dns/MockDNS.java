@@ -1,9 +1,9 @@
-package fr.chatavion.server.dns;
+package fr.chatavion.server.networking.dns;
 
-import fr.chatavion.server.dns.util.Community;
+import fr.chatavion.server.networking.util.Community;
+import fr.chatavion.server.networking.dns.record.RecordType;
 import org.apache.commons.codec.binary.Base32;
 import org.xbill.DNS.*;
-import fr.chatavion.server.dns.record.RecordType;
 import org.xbill.DNS.Record;
 
 import java.io.IOException;

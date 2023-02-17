@@ -1,6 +1,6 @@
 package fr.chatavion.server.admin;
 
-import fr.chatavion.server.dns.util.Community;
+import fr.chatavion.server.networking.util.Community;
 
 import java.util.Scanner;
 import java.util.logging.Logger;

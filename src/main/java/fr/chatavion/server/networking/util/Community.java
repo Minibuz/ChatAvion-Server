@@ -1,4 +1,4 @@
-package fr.chatavion.server.dns.util;
+package fr.chatavion.server.networking.util;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -53,12 +53,8 @@ public class Community {
         return Optional.of(history.get(id).split("@")[1]);
     }
 
-    public void addMessage(String username, String message) {
-        try {
-            Files.write(this.getPathLog(),(LocalDateTime.now() + "@" + username + ":::" + message + "\n").getBytes(), StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public void addMessage(String username, String message) throws IOException {
+        Files.write(this.getPathLog(),(LocalDateTime.now() + "@" + username + ":::" + message + "\n").getBytes(), StandardOpenOption.APPEND);
     }
 
     public static void createCommunity(String name) {
