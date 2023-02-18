@@ -3,8 +3,7 @@ package fr.chatavion.server.networking.tcp.controller;
 
 import fr.chatavion.server.networking.tcp.dto.Message;
 import fr.chatavion.server.networking.tcp.dto.PostMessage;
-import fr.chatavion.server.networking.tcp.service.HistoryInterface;
-import fr.chatavion.server.networking.tcp.service.MessageInterface;
+import fr.chatavion.server.networking.tcp.service.CommunityInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +14,11 @@ import java.util.*;
 @RestController
 public class Controller {
 
-    private final HistoryInterface historyInterface;
-    private final MessageInterface messageInterface;
+    private final CommunityInterface communityInterface;
 
     private Controller(
-            @Autowired HistoryInterface historyInterface,
-            @Autowired MessageInterface messageInterface) {
-        this.historyInterface = historyInterface;
-        this.messageInterface = messageInterface;
+            @Autowired CommunityInterface communityInterface) {
+        this.communityInterface = communityInterface;
     }
 
     @GetMapping(path = "/")
@@ -42,10 +38,23 @@ public class Controller {
 
         // Send treatment to service
         List<Message> messages =
-                historyInterface.retrieveMessagesFromHistory(id, communityName, amount);
+                communityInterface.retrieveMessagesFromHistory(id, communityName, amount);
 
         // Return the result
         return new ResponseEntity<>(messages, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/community/{communityName}")
+    public @ResponseBody ResponseEntity<Boolean> chooseCommunity(
+            @PathVariable String communityName) {
+        // Check on user given parameters
+        Objects.requireNonNull(communityName);
+
+        // Send treatment to service
+        Boolean result = communityInterface.isCommunityExisting(communityName);
+
+        // Return the result
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PostMapping(path = "/message/{communityName}")
@@ -53,9 +62,13 @@ public class Controller {
             @PathVariable String communityName,
             @RequestBody PostMessage message
     ) {
+        // Check on user given parameters
         Objects.requireNonNull(communityName);
 
-        Boolean result = messageInterface.registerMessage(communityName, message);
+        // Send treatment to service
+        Boolean result = communityInterface.registerMessage(communityName, message);
+
+        // Return the result
         return new ResponseEntity<>(result, result?HttpStatus.CREATED:HttpStatus.BAD_REQUEST);
     }
 }

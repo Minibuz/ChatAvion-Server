@@ -1,14 +1,34 @@
 package fr.chatavion.server.networking.tcp.service;
 
 import fr.chatavion.server.networking.tcp.dto.Message;
+import fr.chatavion.server.networking.tcp.dto.PostMessage;
 import fr.chatavion.server.networking.util.Community;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
-public class HistoryService implements HistoryInterface {
+public class CommunityService implements CommunityInterface {
+
+    @Override
+    public Boolean isCommunityExisting(String communityName) {
+        return Community.findCommunity(communityName) != null;
+    }
+
+    @Override
+    public Boolean registerMessage(String communityName, PostMessage message) {
+        Community community = Community.findCommunity(communityName);
+
+        try {
+            community.addMessage(message.getUsername(), message.getMessage());
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 
     @Override
     public List<Message> retrieveMessagesFromHistory(int idStart, String cmtName, int amount) {
