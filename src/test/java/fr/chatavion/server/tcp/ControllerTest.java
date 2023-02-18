@@ -8,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,6 +42,9 @@ public class ControllerTest {
 
     @Test
     public void returnHistory() throws Exception {
+        Path file = Path.of("test.log");
+        Files.createFile(file);
+        Files.write(file, "test@Leo:::Message1".getBytes());
         this.mockMvc.perform(get("/history/test/0?amount=1")).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().json("[{\"id\":0,\"user\":\"Leo\",\"message\":\"Message1\"}]"));
     }
