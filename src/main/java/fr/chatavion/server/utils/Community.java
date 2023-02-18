@@ -1,4 +1,4 @@
-package fr.chatavion.server.networking.util;
+package fr.chatavion.server.utils;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

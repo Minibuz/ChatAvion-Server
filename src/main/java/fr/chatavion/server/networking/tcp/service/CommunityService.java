@@ -2,7 +2,7 @@ package fr.chatavion.server.networking.tcp.service;
 
 import fr.chatavion.server.networking.tcp.dto.Message;
 import fr.chatavion.server.networking.tcp.dto.PostMessage;
-import fr.chatavion.server.networking.util.Community;
+import fr.chatavion.server.utils.Community;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

@@ -1,6 +1,6 @@
 package fr.chatavion.server.networking.dns;
 
-import fr.chatavion.server.networking.util.Community;
+import fr.chatavion.server.utils.Community;
 import fr.chatavion.server.networking.dns.record.RecordType;
 import org.apache.commons.codec.binary.Base32;
 import org.xbill.DNS.*;
