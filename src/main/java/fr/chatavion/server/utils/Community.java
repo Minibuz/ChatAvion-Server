@@ -1,4 +1,4 @@
-package fr.chatavion.server.dns.util;
+package fr.chatavion.server.utils;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -7,10 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class Community {
@@ -24,6 +21,8 @@ public class Community {
     }
 
     private final String name;
+
+    private final Object lock = new Object();
 
     Community(String name) {
         this.name = name.toLowerCase();
@@ -46,18 +45,19 @@ public class Community {
     }
 
     public Optional<String> getMessage(int id) throws IOException {
-        List<String> history = Files.readAllLines(this.getPathLog());
+        List<String> history;
+        synchronized (lock) {
+            history = Files.readAllLines(this.getPathLog());
+        }
         if(history.size() <= id) {
             return Optional.empty();
         }
         return Optional.of(history.get(id).split("@")[1]);
     }
 
-    public void addMessage(String username, String message) {
-        try {
-            Files.write(this.getPathLog(),(LocalDateTime.now() + "@" + username + ":::" + message + "\n").getBytes(), StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+    public void addMessage(String username, String message) throws IOException {
+        synchronized (lock) {
+            Files.write(this.getPathLog(), (LocalDateTime.now() + "@" + username + ":::" + message + "\n").getBytes(), StandardOpenOption.APPEND);
         }
     }
 
