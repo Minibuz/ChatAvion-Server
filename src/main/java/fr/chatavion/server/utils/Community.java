@@ -44,6 +44,14 @@ public class Community {
         return existingCommunities.get(name.toLowerCase());
     }
 
+    public int findLastIdOfCommunity() throws IOException {
+        List<String> history;
+        synchronized (lock) {
+            history = Files.readAllLines(this.getPathLog());
+        }
+        return history.size()-1;
+    }
+
     public Optional<String> getMessage(int id) throws IOException {
         List<String> history;
         synchronized (lock) {

@@ -20,9 +20,9 @@ public class RecordTXT implements RecordType {
     }
 
     @Override
-    public boolean connection(Message response, Name msg) throws IOException {
+    public boolean connection(Message response, Name msg, int id) throws IOException {
         response.addRecord(
-                Record.fromString(msg, Type.TXT, DClass.IN, 86400, "0", Name.root),
+                Record.fromString(msg, Type.TXT, DClass.IN, 300, id + "", Name.root),
                 Section.ANSWER
         );
         return true;

@@ -38,6 +38,6 @@ public class RecordTypeTest {
     @Test
     void typeConnection() throws IOException {
         Message msg = createMessage();
-        assertFalse(RecordType.typeConnection(Type.NS, msg, msg.getQuestion().getName()));
+        assertFalse(RecordType.typeConnection(Type.NS, msg, msg.getQuestion().getName(), 0));
     }
 }
