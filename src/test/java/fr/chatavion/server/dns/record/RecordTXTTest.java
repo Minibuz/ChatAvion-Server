@@ -39,7 +39,7 @@ class RecordTXTTest {
     @Test
     void connection() throws IOException {
         Message msg = createMessage();
-        assertTrue(RecordType.typeConnection(Type.TXT, msg, msg.getQuestion().getName()));
+        assertTrue(RecordType.typeConnection(Type.TXT, msg, msg.getQuestion().getName(), 0));
         assertEquals(1, msg.getSection(Section.ANSWER).size());
     }
 }

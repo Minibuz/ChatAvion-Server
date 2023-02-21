@@ -53,6 +53,7 @@ public class MockDNSTest {
                 logger.severe(() -> "Problem with the server.");
                 return;
             }
+            System.out.println(response.results().get(0));
 
             System.out.println("\nEnter : ");
             while (scanner.hasNextLine()) {

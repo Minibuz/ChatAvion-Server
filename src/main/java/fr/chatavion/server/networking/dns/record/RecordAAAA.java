@@ -69,9 +69,9 @@ public class RecordAAAA implements RecordType {
     }
 
     @Override
-    public boolean connection(Message response, Name msg) throws IOException {
+    public boolean connection(Message response, Name msg, int id) throws IOException {
         response.addRecord(
-                Record.fromString(msg, Type.AAAA, DClass.IN, 86400, "0:0:0:0:0:0:0:0", Name.root),
+                Record.fromString(msg, Type.AAAA, DClass.IN, 300, "0:0:0:0:0:0:0:" + id, Name.root),
                 Section.ANSWER
         );
         return true;

@@ -43,7 +43,9 @@ public class CommunityService implements CommunityInterface {
         try {
             for(int i = idStart; i < idStart + amount; i++) {
                 Message message = retrieveMessage(community, i);
-                messages.add(message);
+                if(message != null) {
+                    messages.add(message);
+                }
             }
         } catch (IOException e) {
             //TODO : Clean exception

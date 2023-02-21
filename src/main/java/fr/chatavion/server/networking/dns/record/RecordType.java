@@ -10,7 +10,7 @@ public interface RecordType {
 
     boolean sendHistorique(Message response, Name msg, byte[] rsp) throws IOException;
 
-    boolean connection(Message response, Name msg) throws IOException;
+    boolean connection(Message response, Name msg, int id) throws IOException;
 
     static boolean sendHistorique(int type, Message response, Name msg, byte[] rsp) throws IOException {
         return switch (type) {
@@ -21,11 +21,11 @@ public interface RecordType {
         };
     }
 
-    static boolean typeConnection(int type, Message response, Name msg) throws IOException {
+    static boolean typeConnection(int type, Message response, Name msg, int id) throws IOException {
         return switch (type) {
-            case Type.A -> new RecordA().connection(response, msg);
-            case Type.AAAA -> new RecordAAAA().connection(response, msg);
-            case Type.TXT -> new RecordTXT().connection(response, msg);
+            case Type.A -> new RecordA().connection(response, msg, id);
+            case Type.AAAA -> new RecordAAAA().connection(response, msg, id);
+            case Type.TXT -> new RecordTXT().connection(response, msg, id);
             default -> false;
         };
     }

@@ -106,8 +106,9 @@ public class MockDNS {
     }
 
     private static void communityConnexionValidation(Message request, Message response, Name msg) throws IOException {
-        if(Community.findCommunity(msg.getLabelString(0).trim().toLowerCase()) != null) {
-            RecordType.typeConnection(request.getQuestion().getType(), response, msg);
+        var cmt = Community.findCommunity(msg.getLabelString(0).trim().toLowerCase());
+        if(cmt != null) {
+            RecordType.typeConnection(request.getQuestion().getType(), response, msg, cmt.findLastIdOfCommunity());
         }
     }
 
