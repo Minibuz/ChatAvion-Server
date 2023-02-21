@@ -41,7 +41,7 @@ public class Controller {
                 communityInterface.retrieveMessagesFromHistory(id, communityName, amount);
 
         // Return the result
-        return new ResponseEntity<>(messages, HttpStatus.OK);
+        return new ResponseEntity<>(messages.stream().filter(Objects::nonNull).toList(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/community/{communityName}")
