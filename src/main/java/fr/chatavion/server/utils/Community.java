@@ -52,7 +52,7 @@ public class Community {
         return history.size()-1;
     }
 
-    public Optional<String> getMessage(int id) throws IOException {
+    public Optional<String> getMessage(int id, int partId) throws IOException {
         List<String> history;
         synchronized (lock) {
             history = Files.readAllLines(this.getPathLog());
@@ -60,7 +60,22 @@ public class Community {
         if(history.size() <= id) {
             return Optional.empty();
         }
-        return Optional.of(history.get(id).split("@")[1]);
+        var message = history.get(id).split("@")[1];
+        System.out.println(message.length());
+
+        if(partId == -1) {
+            return Optional.of(message);
+        }
+
+        var i = 0;
+        var messagePart = new ArrayList<String>();
+        for(i=0; i < message.length()-139; i+=139) {
+            messagePart.add("1" + message.substring(139 * i, 139 * (1 + i)));
+            System.out.println("1" + message.substring(139 * i, 139 * (1 + i)));
+        }
+        messagePart.add("0" + message.substring(i));
+        System.out.println("0" + message.substring(i));
+        return Optional.of(messagePart.get(partId));
     }
 
     public void addMessage(String username, String message) throws IOException {

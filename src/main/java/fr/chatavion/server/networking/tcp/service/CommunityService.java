@@ -56,7 +56,7 @@ public class CommunityService implements CommunityInterface {
     }
 
     private Message retrieveMessage(Community community, int i) throws IOException {
-        Optional<String> optMessage = community.getMessage(i);
+        Optional<String> optMessage = community.getMessage(i, -1);
         if(optMessage.isEmpty()) {
             return null;
         }

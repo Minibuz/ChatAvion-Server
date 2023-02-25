@@ -11,6 +11,9 @@ import java.io.UncheckedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -24,6 +27,7 @@ public class MockDNS {
 
     private static final Base32 converter32 = new Base32();
     private final int port;
+    private static final HashMap<String, String> messages = new HashMap<>();
 
     public MockDNS(int port) {
         this.port = port;
@@ -129,11 +133,13 @@ public class MockDNS {
 
         Optional<String> message;
         if (findO != -1) {
-            message = community.getMessage(Integer.parseInt(val.substring(0, findO)));
+            var idO = findO + 1;
+            message = community.getMessage(Integer.parseInt(val.substring(0, findO)), Integer.parseInt(val.substring(idO)));
         } else if (findN != -1) {
-            message = community.getMessage(Integer.parseInt(val.substring(0, findN)));
+            var idN = findN + 1;
+            message = community.getMessage(Integer.parseInt(val.substring(0, findN)), Integer.parseInt(val.substring(idN)));
         } else {
-            message = community.getMessage(Integer.parseInt(val));
+            message = community.getMessage(Integer.parseInt(val), -1);
         }
         if (message.isPresent()) {
             var rsp = converter32.encode(message.get().getBytes(StandardCharsets.UTF_8));
@@ -145,14 +151,35 @@ public class MockDNS {
     private static boolean registerMessage(Message response, Name msg) throws IOException {
         var cm = new String(converter32.decode(msg.getLabelString(0).getBytes())).trim();
         var pseudo = new String(converter32.decode(msg.getLabelString(1).getBytes())).trim();
-        var message = new String(converter32.decode(msg.getLabelString(2).getBytes())).trim();
+
         var community = Community.findCommunity(cm);
         if(community == null) {
             logger.warning(() -> "Someone try to access a non existing community : " + cm);
             return false;
         }
-        community.addMessage(pseudo, message);
-        logger.info(() -> "UTF-8 > " + cm + ": " + pseudo + " - " + message);
+
+        var messageCoded = msg.getLabelString(2);
+        // idnm"msg" -> 4 bytes "-" 1 byte 1 byte "-"
+        var partMessage = messageCoded.split("-",3);
+        if(partMessage.length != 3) {
+            logger.warning(() -> "Malform message : " + messageCoded);
+            return false;
+        }
+        String id = partMessage[0] + cm + pseudo;
+        int parts = partMessage[1].getBytes()[0];
+        int index = partMessage[1].getBytes()[1];
+
+        if(parts == index) {
+            // Dernière partie du message
+            var messageParts = messages.getOrDefault(id, "");
+            var message = new String(converter32.decode(messageParts + partMessage[2])).trim();
+            community.addMessage(pseudo, message);
+            logger.info(() -> "UTF-8 > " + cm + ": " + pseudo + " - " + message);
+        } else {
+            // Stockée à la suite pour cet id
+            messages.compute(id, (key, value) -> (value == null) ? partMessage[2] : value + partMessage[2]);
+            logger.info(() -> "UTF-8 > " + cm + ": " + pseudo + " - part of message : " + partMessage[2]);
+        }
         response.addRecord(Record.fromString(msg, Type.A, DClass.IN, 3600, "42.42.42.42", Name.root), Section.ANSWER);
         return true;
     }

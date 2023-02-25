@@ -70,8 +70,12 @@ public class RecordAAAA implements RecordType {
 
     @Override
     public boolean connection(Message response, Name msg, int id) throws IOException {
+        int realId = 0;
+        if(id != -1) {
+            realId = id;
+        }
         response.addRecord(
-                Record.fromString(msg, Type.AAAA, DClass.IN, 300, "0:0:0:0:0:0:0:" + id, Name.root),
+                Record.fromString(msg, Type.AAAA, DClass.IN, 300, "0:0:0:0:0:0:0:" + realId, Name.root),
                 Section.ANSWER
         );
         return true;
