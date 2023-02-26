@@ -2,6 +2,7 @@ package fr.chatavion.server.utils;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,10 +69,21 @@ public class Community {
         }
 
         var i = 0;
+        var index = 0;
         var messagePart = new ArrayList<String>();
-        for(i=0; i < message.length()-139; i+=139) {
-            messagePart.add("1" + message.substring(139 * i, 139 * (1 + i)));
-            System.out.println("1" + message.substring(139 * i, 139 * (1 + i)));
+        System.out.println(message.getBytes(StandardCharsets.UTF_8).length);
+
+        // TODO : Ici c'est la merde
+        // On as des tailles en UTF-8 (emote)
+        // On as des tailes en String
+        // Elles sont différentes
+
+        var testValue = 123; // 139 base value
+        for(i=0, index = 0;
+            i < message.getBytes(StandardCharsets.UTF_8).length-testValue && i < message.length() - testValue;
+            i+=testValue, index++) {
+            messagePart.add("1" + message.substring(testValue * index, testValue * (1 + index)));
+            System.out.println("1" + message.substring(testValue * index, testValue * (1 + index)));
         }
         messagePart.add("0" + message.substring(i));
         System.out.println("0" + message.substring(i));
