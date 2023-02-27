@@ -63,4 +63,15 @@ public class CommunityService implements CommunityInterface {
         String[] userFollowByMessage = optMessage.get().split(":::");
         return new Message(i, userFollowByMessage[0], userFollowByMessage[1]);
     }
+
+    @Override
+    public Integer lastMessageId(String communityName) {
+        Community community = Community.findCommunity(communityName);
+
+        try {
+            return community.findLastIdOfCommunity();
+        } catch (IOException e) {
+            return -1;
+        }
+    }
 }

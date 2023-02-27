@@ -12,4 +12,6 @@ public interface CommunityInterface {
     Boolean registerMessage(String communityName, PostMessage message);
 
     Boolean isCommunityExisting(String communityName);
+
+    Integer lastMessageId(String communityName);
 }
