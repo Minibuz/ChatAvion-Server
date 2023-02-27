@@ -43,7 +43,6 @@ public class ControllerTest {
     @Test
     public void returnHistory() throws Exception {
         Path file = Path.of("test.log");
-        Files.createFile(file);
         Files.write(file, "test@Leo:::Message1".getBytes());
         this.mockMvc.perform(get("/history/test/0?amount=1")).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().json("[{\"id\":0,\"user\":\"Leo\",\"message\":\"Message1\"}]"));
@@ -52,13 +51,13 @@ public class ControllerTest {
     @Test
     public void validateCommunityTrue() throws Exception {
         this.mockMvc.perform(get("/community/test")).andDo(print()).andExpect(status().isOk())
-                .andExpect(content().string("true"));
+                .andExpect(content().string("0"));
     }
 
     @Test
     public void validateCommunityFalse() throws Exception {
         this.mockMvc.perform(get("/community/testt")).andDo(print()).andExpect(status().isOk())
-                .andExpect(content().string("false"));
+                .andExpect(content().string("-1"));
     }
 
     @Test

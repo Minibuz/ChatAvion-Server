@@ -45,7 +45,7 @@ public class Controller {
     }
 
     @GetMapping(path = "/community/{communityName}")
-    public @ResponseBody ResponseEntity<Boolean> chooseCommunity(
+    public @ResponseBody ResponseEntity<Integer> chooseCommunity(
             @PathVariable String communityName) {
         // Check on user given parameters
         Objects.requireNonNull(communityName);
@@ -54,7 +54,7 @@ public class Controller {
         Boolean result = communityInterface.isCommunityExisting(communityName);
 
         // Return the result
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(result?communityInterface.lastMessageId(communityName):-1, HttpStatus.OK);
     }
 
     @PostMapping(path = "/message/{communityName}")
