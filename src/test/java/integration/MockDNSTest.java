@@ -8,10 +8,10 @@ import org.xbill.DNS.Type;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Logger;
+
 
 public class MockDNSTest {
 
@@ -77,7 +77,7 @@ public class MockDNSTest {
 
     private void sendMessage(String cmtB32, String userB32, String msg) {
         byte[] msgAsBytes = msg.getBytes(StandardCharsets.UTF_8);
-        if(msgAsBytes.length > 70) {
+        if(msgAsBytes.length > 255) {
             logger.warning("Message cannot be more than 70 character as UTF_8 byte array.");
             return;
         }
@@ -129,11 +129,11 @@ public class MockDNSTest {
             // don't do anything
         }
 
-        var doRetrieve = true;
-        var part = 0;
-        String message = "";
-        do {
-            for (int i = 0; i < nbMsgHistorique; i++) {
+        for (int i = 0; i < nbMsgHistorique; i++) {
+            var doRetrieve = true;
+            var part = 0;
+            String message = "";
+            do {
                 String request = type == Type.TXT ? "m" + id : type == Type.AAAA ? "m" + id + "o" + part : "m" + id + "n" + part;
 
                 Response results = DnsUtils.forNameType(this.resolver, request + "-" + cmtB32 + ".historique." + this.local, type);
@@ -154,21 +154,22 @@ public class MockDNSTest {
                 } else {
                     mergeResultTypeTXT(results.results(), msg);
                 }
-                var messagePart = new String(converter32.decode(ArrayUtils.toPrimitive(msg.toArray(new Byte[0]))));
-                if(messagePart.startsWith("0")) {
-                    message += messagePart.substring(1);
+                var fullMessageWithId = new String(converter32.decode(ArrayUtils.toPrimitive(msg.toArray(new Byte[0]))));
+                System.out.println(fullMessageWithId);
+                if(fullMessageWithId.startsWith("0")) {
+                    message += fullMessageWithId.substring(1);
                     if ("".equals(message)) {
                         return;
                     }
                     id++;
                     list.add(message);
                     doRetrieve = false;
-                } else if (messagePart.startsWith("1")) {
-                    message += messagePart.substring(1);
+                } else if (fullMessageWithId.startsWith("1")) {
+                    message += fullMessageWithId.substring(1);
                     part++;
                 }
-            }
-        } while(doRetrieve);
+            } while(doRetrieve);
+        }
     }
 
     private static void mergeResultTypeA(List<String> results, List<Byte> msg) {

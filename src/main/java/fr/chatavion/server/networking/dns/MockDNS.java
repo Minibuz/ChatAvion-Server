@@ -11,10 +11,7 @@ import java.io.UncheckedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class MockDNS {
@@ -134,16 +131,22 @@ public class MockDNS {
         Optional<String> message;
         if (findO != -1) {
             var idO = findO + 1;
-            message = community.getMessage(Integer.parseInt(val.substring(0, findO)), Integer.parseInt(val.substring(idO)));
+            var part = Integer.parseInt(val.substring(idO));
+            message = community.getMessage(Integer.parseInt(val.substring(0, findO)), part);
         } else if (findN != -1) {
             var idN = findN + 1;
-            message = community.getMessage(Integer.parseInt(val.substring(0, findN)), Integer.parseInt(val.substring(idN)));
+            message = community.getMessage(
+                    Integer.parseInt(val.substring(0, findN)),
+                    Integer.parseInt(val.substring(idN)));
         } else {
             message = community.getMessage(Integer.parseInt(val), -1);
         }
         if (message.isPresent()) {
-            var rsp = converter32.encode(message.get().getBytes(StandardCharsets.UTF_8));
-            return RecordType.sendHistorique(request.getQuestion().getType(), response, msg, rsp);
+            return RecordType.sendHistorique(
+                    request.getQuestion().getType(),
+                    response,
+                    msg,
+                    converter32.encode(message.get().getBytes(StandardCharsets.UTF_8)));
         }
         return false;
     }

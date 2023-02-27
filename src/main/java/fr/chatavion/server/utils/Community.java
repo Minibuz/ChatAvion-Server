@@ -50,7 +50,7 @@ public class Community {
         synchronized (lock) {
             history = Files.readAllLines(this.getPathLog());
         }
-        return history.size()-1;
+        return history.size() - 1;
     }
 
     public Optional<String> getMessage(int id, int partId) throws IOException {
@@ -61,32 +61,33 @@ public class Community {
         if(history.size() <= id) {
             return Optional.empty();
         }
-        var message = history.get(id).split("@")[1];
-        System.out.println(message.length());
+
+        var fullMessage = history.get(id).split("@", 2)[1];
 
         if(partId == -1) {
-            return Optional.of(message);
+            return Optional.of(fullMessage);
         }
 
-        var i = 0;
-        var index = 0;
         var messagePart = new ArrayList<String>();
-        System.out.println(message.getBytes(StandardCharsets.UTF_8).length);
-
-        // TODO : Ici c'est la merde
-        // On as des tailles en UTF-8 (emote)
-        // On as des tailes en String
-        // Elles sont différentes
-
-        var testValue = 123; // 139 base value
-        for(i=0, index = 0;
-            i < message.getBytes(StandardCharsets.UTF_8).length-testValue && i < message.length() - testValue;
-            i+=testValue, index++) {
-            messagePart.add("1" + message.substring(testValue * index, testValue * (1 + index)));
-            System.out.println("1" + message.substring(testValue * index, testValue * (1 + index)));
+        int i, index;
+        var maxSize = 20;
+        var pseudoAndMessage = fullMessage.split(":::");
+        var pseudo = pseudoAndMessage[0];
+        for(i = 0, index = 0;
+            i < pseudo.getBytes(StandardCharsets.UTF_8).length-maxSize && i < pseudo.length() - maxSize;
+            i+=maxSize, index++) {
+            messagePart.add("1" + pseudo.substring(maxSize * index, maxSize * (1 + index)));
+        }
+        messagePart.add("1" + pseudo.substring(i));
+        messagePart.add("1:::");
+        var message = pseudoAndMessage[1];
+        for(i = 0, index = 0;
+            i < message.getBytes(StandardCharsets.UTF_8).length-maxSize && i < message.length() - maxSize;
+            i+=maxSize, index++) {
+            messagePart.add("1" + message.substring(maxSize * index, maxSize * (1 + index)));
         }
         messagePart.add("0" + message.substring(i));
-        System.out.println("0" + message.substring(i));
+
         return Optional.of(messagePart.get(partId));
     }
 
