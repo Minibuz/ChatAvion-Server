@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Logger;
 
+
 public class MockDNSTest {
 
     private static final Logger logger = Logger.getLogger(MockDNSTest.class.getName());
@@ -76,23 +77,46 @@ public class MockDNSTest {
 
     private void sendMessage(String cmtB32, String userB32, String msg) {
         byte[] msgAsBytes = msg.getBytes(StandardCharsets.UTF_8);
-        if(msgAsBytes.length > 35) {
-            logger.warning("Message cannot be more than 35 character as UTF_8 byte array.");
+        if(msgAsBytes.length > 255) {
+            logger.warning("Message cannot be more than 70 character as UTF_8 byte array.");
             return;
         }
         String msgB32 = this.converter32.encodeAsString(msgAsBytes);
 
-        for(int retries = 0; retries < NUMBER_OF_RETRIES; retries++) {
-            Response results = DnsUtils.forNameType(this.resolver, cmtB32 + "." + userB32 + "." + msgB32 + ".message." + this.local, Type.A);
+        // TODO Generate random id for the messages
+        Random r = new Random();
+        int randomId = r.nextInt(65536);
+        int maxSplit = (short) (msgB32.length()/35);
 
-            if(results.results().isEmpty()) {
-                System.out.println(results.statut());
-                return;
-            } else if ("42.42.42.42".equals(results.results().get(0))) {
-                System.out.println("\nServer received the message\n");
-                return;
-            } else {
-                System.out.println("\nServer hasn't received the message\n");
+        int index = 0;
+        List<String> listPart = new ArrayList<>();
+        for(int i = 0; i < msgB32.length()-35; i+=35, index++ ) {
+            String partSend = randomId + "-" +
+                    maxSplit +
+                    index + "-" +
+                    msgB32.substring(i, i+35);
+            listPart.add(partSend);
+        }
+        listPart.add(randomId + "-" +
+                maxSplit +
+                maxSplit + "-" +
+                msgB32.substring(35 * index));
+
+        for(var element : listPart) {
+            System.out.println(element);
+        }
+
+        for(String msgPart : listPart) {
+            for (int retries = 0; retries < NUMBER_OF_RETRIES; retries++) {
+                Response results = DnsUtils.forNameType(this.resolver, cmtB32 + "." + userB32 + "." + msgPart + ".message." + this.local, Type.A);
+
+                if (results.results().isEmpty()) {
+                    System.out.println(results.statut());
+                } else if ("42.42.42.42".equals(results.results().get(0))) {
+                    System.out.println("\nServer received the message\n");
+                } else {
+                    System.out.println("\nServer hasn't received the message\n");
+                }
             }
         }
     }
@@ -105,34 +129,46 @@ public class MockDNSTest {
             // don't do anything
         }
 
-        for(int i = 0; i < nbMsgHistorique; i++) {
-            String request = type == Type.TXT ? "m" + id : type == Type.AAAA ? "m" + id + "o0" : "m" + id + "n0";
+        for (int i = 0; i < nbMsgHistorique; i++) {
+            var doRetrieve = true;
+            var part = 0;
+            String message = "";
+            do {
+                String request = type == Type.TXT ? "m" + id : type == Type.AAAA ? "m" + id + "o" + part : "m" + id + "n" + part;
 
-            Response results = DnsUtils.forNameType(this.resolver, request + "-" + cmtB32 + ".historique." + this.local, type);
-            if(results.statut() == Lookup.UNRECOVERABLE) {
-                System.err.println("Error");
-                return;
-            }
-            if(results.results().isEmpty()) {
-                System.out.println("No message to retrieve");
-                return;
-            }
+                Response results = DnsUtils.forNameType(this.resolver, request + "-" + cmtB32 + ".historique." + this.local, type);
+                if (results.statut() == Lookup.UNRECOVERABLE) {
+                    System.err.println("Error");
+                    return;
+                }
+                if (results.results().isEmpty()) {
+                    System.out.println("No message to retrieve");
+                    return;
+                }
 
-            List<Byte> msg = new ArrayList<>();
-            if (type == Type.A) {
-                mergeResultTypeA(results.results(), msg);
-            } else if (type == Type.AAAA) {
-                mergeResultTypeAAAA(results.results(), msg);
-            } else {
-                mergeResultTypeTXT(results.results(), msg);
-            }
-            String message = new String(converter32.decode(ArrayUtils.toPrimitive(msg.toArray(new Byte[0]))));
-
-            if("".equals(message)) {
-                return;
-            }
-            id++;
-            list.add(message);
+                List<Byte> msg = new ArrayList<>();
+                if (type == Type.A) {
+                    mergeResultTypeA(results.results(), msg);
+                } else if (type == Type.AAAA) {
+                    mergeResultTypeAAAA(results.results(), msg);
+                } else {
+                    mergeResultTypeTXT(results.results(), msg);
+                }
+                var fullMessageWithId = new String(converter32.decode(ArrayUtils.toPrimitive(msg.toArray(new Byte[0]))));
+                System.out.println(fullMessageWithId);
+                if(fullMessageWithId.startsWith("0")) {
+                    message += fullMessageWithId.substring(1);
+                    if ("".equals(message)) {
+                        return;
+                    }
+                    id++;
+                    list.add(message);
+                    doRetrieve = false;
+                } else if (fullMessageWithId.startsWith("1")) {
+                    message += fullMessageWithId.substring(1);
+                    part++;
+                }
+            } while(doRetrieve);
         }
     }
 

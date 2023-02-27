@@ -15,24 +15,25 @@ public class RecordA implements RecordType {
             rspIpv4.append('.');
         }
         String[] part = rspIpv4.substring(0, rspIpv4.length() - 1).split("\\.");
-        for (int i = 0; i < part.length - part.length%3; i += 3) {
+        var count = 0;
+        for (int i = 0; i < part.length - part.length%3; i += 3, count += 1) {
             response.addRecord(
                     Record.fromString(msg, Type.A, DClass.IN, 300,
-                            i + "." + part[i] + "." + part[i + 1] + "." + part[i + 2],
+                            count + "." + part[i] + "." + part[i + 1] + "." + part[i + 2],
                             Name.root),
                     Section.ANSWER);
         }
         if(part.length%3 == 1) {
             response.addRecord(
                     Record.fromString(msg, Type.A, DClass.IN, 300,
-                            part.length-1 + "." + part[part.length-1] + ".0.0",
+                            count + "." + part[part.length-1] + ".0.0",
                             Name.root),
                     Section.ANSWER);
         }
         if(part.length%3 == 2) {
             response.addRecord(
                     Record.fromString(msg, Type.A, DClass.IN, 300,
-                            part.length-2 + "." + part[part.length-2] + "." + part[part.length-1] + ".0",
+                            count + "." + part[part.length-2] + "." + part[part.length-1] + ".0",
                             Name.root),
                     Section.ANSWER);
         }
@@ -41,8 +42,12 @@ public class RecordA implements RecordType {
 
     @Override
     public boolean connection(Message response, Name msg, int id) throws IOException {
+        int realId = 0;
+        if(id != -1) {
+            realId = id;
+        }
         response.addRecord(
-                Record.fromString(msg, Type.A, DClass.IN, 86400, "0.0.0." + id, Name.root),
+                Record.fromString(msg, Type.A, DClass.IN, 300, "0.0.0." + realId, Name.root),
                 Section.ANSWER
         );
         return true;

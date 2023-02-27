@@ -2,6 +2,7 @@ package fr.chatavion.server.utils;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,10 +50,10 @@ public class Community {
         synchronized (lock) {
             history = Files.readAllLines(this.getPathLog());
         }
-        return history.size()-1;
+        return history.size() - 1;
     }
 
-    public Optional<String> getMessage(int id) throws IOException {
+    public Optional<String> getMessage(int id, int partId) throws IOException {
         List<String> history;
         synchronized (lock) {
             history = Files.readAllLines(this.getPathLog());
@@ -60,7 +61,34 @@ public class Community {
         if(history.size() <= id) {
             return Optional.empty();
         }
-        return Optional.of(history.get(id).split("@")[1]);
+
+        var fullMessage = history.get(id).split("@", 2)[1];
+
+        if(partId == -1) {
+            return Optional.of(fullMessage);
+        }
+
+        var messagePart = new ArrayList<String>();
+        int i, index;
+        var maxSize = 20;
+        var pseudoAndMessage = fullMessage.split(":::");
+        var pseudo = pseudoAndMessage[0];
+        for(i = 0, index = 0;
+            i < pseudo.getBytes(StandardCharsets.UTF_8).length-maxSize && i < pseudo.length() - maxSize;
+            i+=maxSize, index++) {
+            messagePart.add("1" + pseudo.substring(maxSize * index, maxSize * (1 + index)));
+        }
+        messagePart.add("1" + pseudo.substring(i));
+        messagePart.add("1:::");
+        var message = pseudoAndMessage[1];
+        for(i = 0, index = 0;
+            i < message.getBytes(StandardCharsets.UTF_8).length-maxSize && i < message.length() - maxSize;
+            i+=maxSize, index++) {
+            messagePart.add("1" + message.substring(maxSize * index, maxSize * (1 + index)));
+        }
+        messagePart.add("0" + message.substring(i));
+
+        return Optional.of(messagePart.get(partId));
     }
 
     public void addMessage(String username, String message) throws IOException {
