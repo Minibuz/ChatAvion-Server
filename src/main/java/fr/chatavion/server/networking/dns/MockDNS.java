@@ -30,6 +30,10 @@ public class MockDNS {
         this.port = port;
     }
 
+    /**
+     * Main method of a mockdns instance.
+     * This is starting the dns part of the server.
+     */
     public void start() {
         logger.info(() -> "Server starting on port " + this.port);
         running = true;
@@ -44,12 +48,21 @@ public class MockDNS {
         thread.start();
     }
 
+    /**
+     * Stop the dns server.
+     */
     public void stop() {
         running = false;
         thread.interrupt();
         thread = null;
     }
 
+    /**
+     * Serve the incoming request and redirect them to the process.
+     *
+     * @throws IOException
+     *          if the socket could not be opened, or the socket could not bind to the specified local port.
+     */
     private void serve() throws IOException {
         logger.info("Creating socket...");
         try (DatagramSocket socket = new DatagramSocket(port)) {
@@ -60,13 +73,21 @@ public class MockDNS {
         }
     }
 
+    /**
+     * Main process of the DNS server.
+     *
+     * @param socket
+     *          contain the byte of the info send other network.
+     * @throws IOException
+     *          if an I/O error occurs.
+     */
     private void process(DatagramSocket socket) throws IOException {
         byte[] in = new byte[UDP_SIZE];
 
         // Read the request
         DatagramPacket indp = new DatagramPacket(in, UDP_SIZE);
         socket.receive(indp);
-        logger.info(() -> "Processing entry...");
+        logger.info(() -> "Processing entry");
 
         try {
             // Build the response
@@ -75,37 +96,56 @@ public class MockDNS {
             response.addRecord(request.getQuestion(), Section.QUESTION);
             response.getHeader().setFlag(Flags.QR);
 
-            // Treat the request corresponding to the given type of request
+            // Verify that the question is on the good format
             var question = request.getQuestion();
+            // Question shouldn't be empty
             if(question == null) {
+                logger.warning(() -> "Message doesn't contain a question");
                 return;
             }
             var msg = question.getName();
+            // The name should at least be x.x.x.x
             if(msg.labels()<4) {
+                logger.warning(() -> "Message question isn't compose of 4 labels or more " + msg);
                 return;
             }
+
+            // Treat the request corresponding to the given type of request
             var treatment = msg.getLabelString(1).toLowerCase();
             if ("connexion".equals(treatment)) {
-                logger.info("Connexion");
+                logger.info(() -> "Connexion " + msg);
                 communityConnexionValidation(request, response, msg);
             } else if (treatment.contains("historique")) {
-                logger.info("Historique");
+                logger.info(() -> "Historic" + msg);
                 getHistorique(request, response, msg);
             } else if (msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equalsIgnoreCase(msg.getLabelString(3))) {
-                logger.info("Message");
+                logger.info(() -> "Message " + msg);
                 registerMessage(response, msg);
             }
 
             // Send the response as a packet
             byte[] resp = response.toWire();
             DatagramPacket outdp = new DatagramPacket(resp, resp.length, indp.getAddress(), indp.getPort());
-            logger.info(() -> "sending output...");
+            logger.info(() -> "Sending output");
             socket.send(outdp);
         } catch (WireParseException e) {
             logger.warning(() -> "Something went wrong - " + e.getMessage());
         }
     }
 
+    /**
+     * Verify the community the client is trying to connect to.
+     * And fill the response accordingly.
+     *
+     * @param request
+     *          Message send by the client
+     * @param response
+     *          Response getting filled to be sent to the client
+     * @param msg
+     *          Name containing the request in the url
+     * @throws IOException
+     *
+     */
     private static void communityConnexionValidation(Message request, Message response, Name msg) throws IOException {
         var cmt = Community.findCommunity(msg.getLabelString(0).trim().toLowerCase());
         if(cmt != null) {
@@ -113,6 +153,24 @@ public class MockDNS {
         }
     }
 
+    /**
+     *  Get message from the historic based on a specific community and the request from the client.
+     *  The function first extracts the community name, message id, and optional part number from the label of the DNS query contained in the msg parameter.
+     *  It then searches for the message in the community by calling the getMessage method of the Community class.
+     *  If the message is found, it is encoded using a Base32 encoder and added to the DNS response message using the sendHistorique method of the RecordType class,
+     *  either type A, type AAAA or type TXT.
+     *  The function returns true if the message was found and added to the response, false otherwise.
+     *
+     * @param request
+     *          Message send by the client
+     * @param response
+     *          Response getting filled to be sent to the client
+     * @param msg
+     *          Name containing the request in the url
+     * @return
+     *          True if a message with a given id can be found, otherwise false
+     * @throws IOException
+     */
     private static boolean getHistorique(Message request, Message response, Name msg) throws IOException {
         String[] cmAndId = msg.getLabelString(0).split("-");
         var cmB32 = cmAndId[1];
@@ -151,6 +209,18 @@ public class MockDNS {
         return false;
     }
 
+    /**
+     * Register a message in a specific community
+     *
+     * @param response
+     *          Response getting filled to be sent to the client
+     * @param msg
+     *          Name containing the request in the url
+     * @return
+     *          Boolean indicating whether the registration was successful or not
+     * @throws IOException
+     *          If an IO exception occurs
+     */
     private static boolean registerMessage(Message response, Name msg) throws IOException {
         var cm = new String(converter32.decode(msg.getLabelString(0).getBytes())).trim();
         var pseudo = new String(converter32.decode(msg.getLabelString(1).getBytes())).trim();
@@ -162,10 +232,10 @@ public class MockDNS {
         }
 
         var messageCoded = msg.getLabelString(2);
-        // idnm"msg" -> 4 bytes "-" 1 byte 1 byte "-"
+        // id random "-" nmOfPart PartId "-" msgB32 -> 4 bytes "-" 1 byte 1 byte "-" msgB32
         var partMessage = messageCoded.split("-",3);
         if(partMessage.length != 3) {
-            logger.warning(() -> "Malform message : " + messageCoded);
+            logger.warning(() -> "Malformed message : " + messageCoded);
             return false;
         }
         String id = partMessage[0] + cm + pseudo;
