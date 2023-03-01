@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of CommunityInterface.
+ */
 @Service
 public class CommunityService implements CommunityInterface {
 
