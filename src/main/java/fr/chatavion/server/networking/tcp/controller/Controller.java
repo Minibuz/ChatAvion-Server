@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+/**
+ * This class represents a REST controller that handles HTTP requests and responses.
+ * It interacts with a CommunityInterface object to perform various operations related to a community,
+ * such as retrieving history, choosing a community, and sending a message.
+ */
 @RestController
 public class Controller {
 
@@ -26,6 +31,21 @@ public class Controller {
         return "It works";
     }
 
+    /**
+     * Handles HTTP GET requests to the "/history/{communityName}/{idStr}" path.
+     * Retrieves a list of messages from the history of a specified community.
+     * The idStr and communityName path variables specify the community and the ID of the message to retrieve history from.
+     * The amount parameter specifies the maximum number of messages to retrieve.
+     *
+     * @param idStr
+     *          Id of the first message to retrieve
+     * @param communityName
+     *          Name of the community from which the message will be return
+     * @param amount
+     *          Number of message to be return, default value is 10
+     * @return
+     *          {@link ResponseEntity} of {@link List} of {@link Message}
+     */
     @GetMapping(path = "/history/{communityName}/{idStr}")
     public @ResponseBody ResponseEntity<List<Message>> retrieveHistory(
             @PathVariable String idStr,
@@ -44,6 +64,17 @@ public class Controller {
         return new ResponseEntity<>(messages.stream().filter(Objects::nonNull).toList(), HttpStatus.OK);
     }
 
+    /**
+     * Handles HTTP GET requests to the "/community/{communityName}" path.
+     * Determines whether a specified community exists.
+     * The communityName path variable specifies the community to check.
+     * Returns the ID of the last message in the community, or -1 if the community does not exist.
+     *
+     * @param communityName
+     *          Name of the community from which the message will be return
+     * @return
+     *          {@link ResponseEntity} of {@link Integer}
+     */
     @GetMapping(path = "/community/{communityName}")
     public @ResponseBody ResponseEntity<Integer> chooseCommunity(
             @PathVariable String communityName) {
@@ -57,6 +88,19 @@ public class Controller {
         return new ResponseEntity<>(result?communityInterface.lastMessageId(communityName):-1, HttpStatus.OK);
     }
 
+    /**
+     * Handles HTTP POST requests to the "/message/{communityName}" path. `
+     * Sends a message to a specified community.
+     * The communityName path variable specifies the community to send the message to.
+     * The message parameter contains the details of the message to send.
+     *
+     * @param communityName
+     *          Name of the community from which the message will be return
+     * @param message
+     *          Message that is getting send to the server
+     * @return
+     *          {@link ResponseEntity} of {@link Boolean}
+     */
     @PostMapping(path = "/message/{communityName}")
     public @ResponseBody ResponseEntity<Boolean> sendMessage(
             @PathVariable String communityName,
