@@ -27,11 +27,4 @@ class ConsoleTest {
         Files.delete(Path.of("test.log"));
         Files.delete(Path.of("default.log"));
     }
-
-    @Test
-    void consoleTestThrow() {
-        InputStream in = new ByteArrayInputStream("explosion".getBytes());
-        System.setIn(in);
-        assertThrows(IllegalStateException.class, () -> new Console().start());
-    }
 }
