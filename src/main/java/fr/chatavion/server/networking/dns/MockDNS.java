@@ -116,7 +116,7 @@ public class MockDNS {
                 logger.info(() -> "Connexion " + msg);
                 communityConnexionValidation(request, response, msg);
             } else if (treatment.contains("historique")) {
-                logger.info(() -> "Historic" + msg);
+                logger.info(() -> "Historic " + msg);
                 getHistorique(request, response, msg);
             } else if (msg.labels() > 4 && !"_".equals(msg.getLabelString(0)) && "message".equalsIgnoreCase(msg.getLabelString(3))) {
                 logger.info(() -> "Message " + msg);
