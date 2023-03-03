@@ -20,6 +20,7 @@ public class Community {
     private static final Logger logger = Logger.getLogger(Community.class.getName());
 
     private static final Map<String, Community> existingCommunities = new HashMap<>();
+
     /*
      * The two community getting created by default.
      * default is the base community and test is used for test as well as being a base community.
@@ -45,30 +46,38 @@ public class Community {
         }
     }
 
-    private Path getPathLog() {
-        return Path.of(System.getProperty("user.dir"), name + ".log");
-    }
-
     /**
      * Retrieve the community associate with the name (non-case-sensitive).
      * If the community doesn't exist, return null.
      *
-     * @param name
-     *          {@link String}
-     * @return
-     *          {@link Community}
+     * @param name {@link String}
+     * @return {@link Community}
      */
     public static Community findCommunity(String name) {
         return existingCommunities.get(name.toLowerCase());
     }
 
     /**
+     * Admin command to create a new community. This command will also create the file
+     * for the community.
+     *
+     * @param name {@link String}
+     */
+    public static void createCommunity(String name) {
+        Community community = new Community(name);
+        existingCommunities.put(name, community);
+        logger.info(() -> "Community " + name + " has been created.");
+    }
+
+    private Path getPathLog() {
+        return Path.of(System.getProperty("user.dir"), name + ".log");
+    }
+
+    /**
      * Give the id of the latest message in the log of the community.
      *
-     * @return
-     *          int
-     * @throws IOException
-     *          if an I/O error occurs reading from the file or a malformed or unmappable byte sequence is read
+     * @return int
+     * @throws IOException if an I/O error occurs reading from the file or a malformed or unmappable byte sequence is read
      */
     public int findLastIdOfCommunity() throws IOException {
         List<String> history;
@@ -83,44 +92,43 @@ public class Community {
      * return the exact part given.
      * It can also return the full message if partId is equal to -1.
      *
-     * @param id int
+     * @param id     int
      * @param partId int
-     * @return
-     *          {@link Optional} of {@link String}
-     * @throws IOException
-     *          if an I/O error occurs reading from the file or a malformed or unmappable byte sequence is read
+     * @return {@link Optional} of {@link String}
+     * @throws IOException if an I/O error occurs reading from the file or a malformed or unmappable byte sequence is read
      */
     public Optional<String> getMessage(int id, int partId) throws IOException {
         List<String> history;
         synchronized (lock) {
             history = Files.readAllLines(this.getPathLog());
         }
-        if(history.size() <= id) {
+        if (history.size() <= id) {
             return Optional.empty();
         }
 
         var fullMessage = history.get(id).split("@", 2)[1];
 
-        if(partId == -1) {
+        if (partId == -1) {
             return Optional.of(fullMessage);
         }
 
         var messagePart = new ArrayList<String>();
-        int i, index;
+        int i;
+        int index;
         var maxSize = 20;
         var pseudoAndMessage = fullMessage.split(":::");
         var pseudo = pseudoAndMessage[0];
-        for(i = 0, index = 0;
-            i < pseudo.getBytes(StandardCharsets.UTF_8).length-maxSize && i < pseudo.length() - maxSize;
-            i+=maxSize, index++) {
+        for (i = 0, index = 0;
+             i < pseudo.getBytes(StandardCharsets.UTF_8).length - maxSize && i < pseudo.length() - maxSize;
+             i += maxSize, index++) {
             messagePart.add("1" + pseudo.substring(maxSize * index, maxSize * (1 + index)));
         }
         messagePart.add("1" + pseudo.substring(i));
         messagePart.add("1:::");
         var message = pseudoAndMessage[1];
-        for(i = 0, index = 0;
-            i < message.getBytes(StandardCharsets.UTF_8).length-maxSize && i < message.length() - maxSize;
-            i+=maxSize, index++) {
+        for (i = 0, index = 0;
+             i < message.getBytes(StandardCharsets.UTF_8).length - maxSize && i < message.length() - maxSize;
+             i += maxSize, index++) {
             messagePart.add("1" + message.substring(maxSize * index, maxSize * (1 + index)));
         }
         messagePart.add("0" + message.substring(i));
@@ -131,31 +139,15 @@ public class Community {
     /**
      * Add the message with the username into the log of the community.
      * It will add it with the date of reception under the format:
-     *  date@username:::message
+     * date@username:::message
      *
-     * @param username
-     *          {@link String}
-     * @param message
-     *          {@link String}
-     * @throws IOException
-     *          if an I/O error occurs writing to or creating the file
+     * @param username {@link String}
+     * @param message  {@link String}
+     * @throws IOException if an I/O error occurs writing to or creating the file
      */
     public void addMessage(String username, String message) throws IOException {
         synchronized (lock) {
             Files.write(this.getPathLog(), (LocalDateTime.now() + "@" + username + ":::" + message + "\n").getBytes(), StandardOpenOption.APPEND);
         }
-    }
-
-    /**
-     * Admin command to create a new community. This command will also create the file
-     * for the community.
-     *
-     * @param name
-     *          {@link String}
-     */
-    public static void createCommunity(String name) {
-        Community community = new Community(name);
-        existingCommunities.put(name, community);
-        logger.info(() -> "Community " + name + " has been created.");
     }
 }
