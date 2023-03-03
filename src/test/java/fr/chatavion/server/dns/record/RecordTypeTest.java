@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class RecordTypeTest {
+class RecordTypeTest {
 
     private static final Base32 converter32 = new Base32();
 
