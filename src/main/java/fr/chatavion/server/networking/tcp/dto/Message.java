@@ -6,12 +6,12 @@ public class Message {
 
     private final int id;
     private final String user;
-    private final String message;
+    private final String msg;
 
     public Message(int id, String user, String message) {
         this.id = id;
         this.user = user;
-        this.message = message;
+        this.msg = message;
     }
 
     public int getId() {
@@ -23,7 +23,7 @@ public class Message {
     }
 
     public String getMessage() {
-        return message;
+        return msg;
     }
 
     @Override
@@ -31,12 +31,12 @@ public class Message {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Message message1 = (Message) o;
-        return id == message1.id && Objects.equals(user, message1.user) && Objects.equals(message, message1.message);
+        return id == message1.id && Objects.equals(user, message1.user) && Objects.equals(msg, message1.msg);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, message);
+        return Objects.hash(id, user, msg);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class Message {
         return "Message{" +
                 "id=" + id +
                 ", user='" + user + '\'' +
-                ", message='" + message + '\'' +
+                ", message='" + msg + '\'' +
                 '}';
     }
 }
