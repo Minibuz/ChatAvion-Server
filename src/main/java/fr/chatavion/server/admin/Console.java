@@ -11,9 +11,10 @@ import java.util.logging.Logger;
  */
 public class Console {
 
-    private final static Logger logger = Logger.getLogger(Console.class.getName());
+    private static final Logger logger = Logger.getLogger(Console.class.getName());
 
     public Console() {
+        // Empty constructor
     }
 
     /**
