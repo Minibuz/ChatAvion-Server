@@ -38,7 +38,6 @@ public class CommunityService implements CommunityInterface {
         Community community = Community.findCommunity(cmtName);
 
         if(community == null) {
-            //TODO : Throw personnal exception to catch to send error to the client.
             return List.of();
         }
 
@@ -51,7 +50,6 @@ public class CommunityService implements CommunityInterface {
                 }
             }
         } catch (IOException e) {
-            //TODO : Clean exception
             throw new RuntimeException(e);
         }
 
