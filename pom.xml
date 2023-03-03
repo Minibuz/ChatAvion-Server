@@ -5,7 +5,7 @@
 
 	<groupId>fr.chatavion</groupId>
 	<artifactId>server</artifactId>
-	<version>0.5.0</version>
+	<version>1.0.0</version>
 
 	<name>server</name>
 	<description>Server side of Chatavion project</description>
