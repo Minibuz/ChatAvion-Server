@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ControllerTest {
+class ControllerTest {
 
     @Autowired
     private Controller controller;
@@ -30,18 +30,18 @@ public class ControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
         assertThat(controller).isNotNull();
     }
 
     @Test
-    public void defaultMessage() throws Exception {
+    void defaultMessage() throws Exception {
         this.mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().string(containsString("It works")));
     }
 
     @Test
-    public void returnHistory() throws Exception {
+    void returnHistory() throws Exception {
         Path file = Path.of("test.log");
         Files.write(file, "test@Leo:::Message1".getBytes());
         this.mockMvc.perform(get("/history/test/0?amount=1")).andDo(print()).andExpect(status().isOk())
@@ -49,19 +49,19 @@ public class ControllerTest {
     }
 
     @Test
-    public void validateCommunityTrue() throws Exception {
+    void validateCommunityTrue() throws Exception {
         this.mockMvc.perform(get("/community/test")).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().string("0"));
     }
 
     @Test
-    public void validateCommunityFalse() throws Exception {
-        this.mockMvc.perform(get("/community/testt")).andDo(print()).andExpect(status().isOk())
+    void validateCommunityFalse() throws Exception {
+        this.mockMvc.perform(get("/community/badTest")).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().string("-1"));
     }
 
     @Test
-    public void sendMessage() throws Exception {
+    void sendMessage() throws Exception {
         this.mockMvc.perform(
                 post("/message/test").contentType(MediaType.APPLICATION_JSON)
                             .content("{\"username\": \"leo\", \"message\": \"test\"}"))
