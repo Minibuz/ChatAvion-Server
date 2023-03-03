@@ -54,6 +54,7 @@ public class Community {
      * @return {@link Community}
      */
     public static Community findCommunity(String name) {
+        Objects.requireNonNull(name);
         return existingCommunities.get(name.toLowerCase());
     }
 
@@ -64,6 +65,7 @@ public class Community {
      * @param name {@link String}
      */
     public static void createCommunity(String name) {
+        Objects.requireNonNull(name);
         Community community = new Community(name);
         existingCommunities.put(name, community);
         logger.info(() -> "Community " + name + " has been created.");
