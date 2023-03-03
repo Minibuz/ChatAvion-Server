@@ -21,8 +21,7 @@ public class Controller {
 
     private final CommunityInterface communityInterface;
 
-    private Controller(
-            @Autowired CommunityInterface communityInterface) {
+    private Controller(@Autowired CommunityInterface communityInterface) {
         this.communityInterface = communityInterface;
     }
 
@@ -37,14 +36,10 @@ public class Controller {
      * The idStr and communityName path variables specify the community and the ID of the message to retrieve history from.
      * The amount parameter specifies the maximum number of messages to retrieve.
      *
-     * @param idStr
-     *          Id of the first message to retrieve
-     * @param communityName
-     *          Name of the community from which the message will be return
-     * @param amount
-     *          Number of message to be return, default value is 10
-     * @return
-     *          {@link ResponseEntity} of {@link List} of {@link Message}
+     * @param idStr         ID of the first message to retrieve
+     * @param communityName Name of the community from which the message will be return
+     * @param amount        Number of message to be return, default value is 10
+     * @return {@link ResponseEntity} of {@link List} of {@link Message}
      */
     @GetMapping(path = "/history/{communityName}/{idStr}")
     public @ResponseBody ResponseEntity<List<Message>> retrieveHistory(
@@ -70,10 +65,8 @@ public class Controller {
      * The communityName path variable specifies the community to check.
      * Returns the ID of the last message in the community, or -1 if the community does not exist.
      *
-     * @param communityName
-     *          Name of the community from which the message will be return
-     * @return
-     *          {@link ResponseEntity} of {@link Integer}
+     * @param communityName Name of the community from which the message will be return
+     * @return {@link ResponseEntity} of {@link Integer}
      */
     @GetMapping(path = "/community/{communityName}")
     public @ResponseBody ResponseEntity<Integer> chooseCommunity(
@@ -82,10 +75,10 @@ public class Controller {
         Objects.requireNonNull(communityName);
 
         // Send treatment to service
-        Boolean result = communityInterface.isCommunityExisting(communityName);
+        boolean result = communityInterface.isCommunityExisting(communityName);
 
         // Return the result
-        return new ResponseEntity<>(result?communityInterface.lastMessageId(communityName):-1, HttpStatus.OK);
+        return new ResponseEntity<>(result ? communityInterface.lastMessageId(communityName) : -1, HttpStatus.OK);
     }
 
     /**
@@ -94,12 +87,9 @@ public class Controller {
      * The communityName path variable specifies the community to send the message to.
      * The message parameter contains the details of the message to send.
      *
-     * @param communityName
-     *          Name of the community from which the message will be return
-     * @param message
-     *          Message that is getting send to the server
-     * @return
-     *          {@link ResponseEntity} of {@link Boolean}
+     * @param communityName Name of the community from which the message will be return
+     * @param message       Message that is getting send to the server
+     * @return {@link ResponseEntity} of {@link Boolean}
      */
     @PostMapping(path = "/message/{communityName}")
     public @ResponseBody ResponseEntity<Boolean> sendMessage(
@@ -110,9 +100,9 @@ public class Controller {
         Objects.requireNonNull(communityName);
 
         // Send treatment to service
-        Boolean result = communityInterface.registerMessage(communityName, message);
+        boolean result = communityInterface.registerMessage(communityName, message);
 
         // Return the result
-        return new ResponseEntity<>(result, result?HttpStatus.CREATED:HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(result, result ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 }
