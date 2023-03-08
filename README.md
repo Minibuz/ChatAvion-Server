@@ -38,12 +38,60 @@ An admin console is provided for managing the community. The console can be acce
 
 ### Network DNS
 The server will receive three types of request.<br>
+
 First of all is the *connexion* request. This request will be a DNS request as follows "*communityname*.connexion.example.com" with communityname being the community the user is trying to access.<br>
-This request will have two possible output. First is the community exist. In that case, the server will add to the answer of the DNS message a record of type A containing the id of the last message of the community.<br>
+This request will have two possible output.<br>
+First is the community exist. In that case, the server will add to the answer of the DNS message a record of type A containing the id of the last message of the community.<br>
 ```
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 7777
+;; flags: qr ; qd: 1 an: 1 au: 0 ad: 0 
+;; QUESTIONS:
+;;	test.connexion.example.com., type = A, class = IN
 
+;; ANSWERS:
+test.connexion.example.com.	300	IN	A	0.0.0.10
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+
+;; Message size: 0 bytes
 ```
+In the answer field, we can see a response which means the community test exists and the last message of the community is at id 10.<br>
+The second case is if the community doesn't exist on the given server. In this case, we have the following response :<br>
+```
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 7777
+;; flags: qr ; qd: 1 an: 0 au: 0 ad: 0 
+;; QUESTIONS:
+;;	test.connexion.example.com., type = A, class = IN
 
+;; ANSWERS:
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+
+;; Message size: 0 bytes
+```
+This time, the answer field is empty.<br>
+
+Second type of request the server is going to receive are the message request.<br>
+They are formed as follows :
+```
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 20630
+;; flags: qr ; qd: 1 an: 1 au: 0 ad: 0 
+;; QUESTIONS:
+;;	ORSXG5A=.ORSXG5A=.25963-00-ORSXG5A=.message.example.com., type = A, class = IN
+
+;; ANSWERS:
+ORSXG5A=.ORSXG5A=.25963-00-ORSXG5A=.message.example.com.	3600	IN	A	42.42.42.42
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+
+;; Message size: 0 bytes
+```
 ### Network HTTP
 
 
