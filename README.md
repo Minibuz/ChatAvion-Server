@@ -7,7 +7,7 @@ This version also include an HTTP version in order to make it more efficient for
 
 Initially, this was a NodeJS prototype made by @vincesafe at https://github.com/vincesafe/chatavion
 
-Thee program is composed of a Spring project that provides a DNS server on port 53 and an HTTP server on port 80.<br>
+The program is composed of a Spring project that provides a DNS server on port 53 and an HTTP server on port 80.<br>
 The DNS server responds to queries for a specific domain with a pre-configured IP address, and the HTTP server responds to the same request on a REST API implementation.
 
 # Prerequisites
@@ -23,9 +23,9 @@ In order to make the program able to retrieve message, multiple steps are requir
 - The server need to have a dns record associate with the fixed ipv4 address, for it to work, it need to start with **chat.** : <br>
 For example : *chat.example.com A 1.1.1.12*
 - Three domains need to be set up to redirect DNS queries to the server, in NS type, they need to start with **message**, **connexion**, **historique** as follows :
-*message.example.com NS chat.example.com*
-*connexion.example.com NS chat.example.com*
-*historique.example.com NS chat.example.com* (This will be change to history in a future patch)
+  - *message.example.com NS chat.example.com*
+  - *connexion.example.com NS chat.example.com*
+  - *historique.example.com NS chat.example.com* (This will be change to history in a future patch)
 
 # Getting Started
 
