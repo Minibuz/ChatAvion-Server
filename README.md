@@ -29,10 +29,10 @@ For example : *chat.example.com A 1.1.1.12*
 
 # Getting Started
 
-Clone the repository: git clone https://github.com/yourusername/spring-dns-http-server.git <br>
-Change directory: cd spring-dns-http-server <br>
-Build the project: mvn clean install <br>
-Run the server: sudo java -jar target/spring-dns-http-server-0.0.1-SNAPSHOT.jar <br>
+Clone the repository: ```git clone https://github.com/Minibuz/ChatAvion-Server ```<br>
+Change directory: ```cd ChatAvion-Server```<br>
+Build the project: ```mvn clean install``` <br>
+Run the server: ```sudo java -jar target/server-x.x.x.jar``` <br>
 The server will start and listen for incoming DNS and HTTP requests on ports 53 and 80 respectively. <br>
 An admin console is provided for managing the community. The console can be accessed directly from the application console.
 
@@ -101,7 +101,7 @@ The last part is the message part. This part is composed of multiple subpart, ea
 First is a random short generated in order to identify the message and recompose it. 
 The second part is composed of two numbers from 0 to 9. The first one is the number of total part of the message. The second one is the id of the part following the next '-'.
 When those two numbers are equals, it means that the whole message have been sent, the server can then decrypt and recompose the whole message before storing it in the community log.
-The third and last part is the message subpart encrypted in Base 32.
+The third part is the message subpart encrypted in Base 32.
 
 Third type of request are the history request. Those are the most complex request as they involved splitting message in multiple parts depending on ids received in the request.
 ```
@@ -143,16 +143,16 @@ For example, " *community community* " will create a new community for every use
 Those community needs to be recreated every time the server is restarted. But the history of message will be keep in the log file corresponding to the name of the community as "community.log".
 
 ### Using the server
-If you are a server owner and want to start the server to let it run on a distant server, u can use the following commands :
+If you are a server owner and want to start the server to let it run on a distant server, you can use the following commands :
 
-- ```sudo java -jar server-\*.\*.\*.jar``` is used to start the server. If u are already using a root account,
+- ```sudo java -jar server-\*.\*.\*.jar``` is used to start the server. If you are already using a root account,
 u can remove the sudo.
-- ```screen -S xyz``` with xyz being the name of the screen u want to create. This command allow the user to start
+- ```screen -S screenName``` with screenName being the name of the screen you want to create. This command allow the user to start
 a screen to separate the logs of the server from the main screen. It also permits the server to run after leaving
 the communication such as ssh.
-- ```screen -r xyz``` with xyz being the name of the screen u want to create. This command allow the user to swap the
-current screen to xyz screen.
-While being on a screen, u can return to the main one using ctrl+a+d.<br>
+- ```screen -r screenName``` with screenName being the name of the screen you want to create. This command allow the user to swap the
+current screen to screenName screen.<br>
+While being on a screen, you can return to the main one using ctrl+a+d.<br>
 
 # License
 
