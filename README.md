@@ -92,6 +92,47 @@ ORSXG5A=.ORSXG5A=.25963-00-ORSXG5A=.message.example.com.	3600	IN	A	42.42.42.42
 
 ;; Message size: 0 bytes
 ```
+Those request have a question formed as follows :<br>
+*communityBase32.usernameBase32.randomId-totalPartpartId-messagePartBase32.message.example.com*<br>
+In this question, we can see each part is a different element.<br>
+communityBase32 is the community the message is getting send on. The name of the community is transform in Base 32 for the request.<br>
+usernameBase32 is the username of the user sending the message. The username is transform in Base 32 for the request.<br>
+The last part is the message part. This part is composed of multiple subpart, each subpart is being split with '-'. 
+First is a random short generated in order to identify the message and recompose it. 
+The second part is composed of two numbers from 0 to 9. The first one is the number of total part of the message. The second one is the id of the part following the next '-'.
+When those two numbers are equals, it means that the whole message have been sent, the server can then decrypt and recompose the whole message before storing it in the community log.
+The third and last part is the message subpart encrypted in Base 32.
+
+Third type of request are the history request. Those are the most complex request as they involved splitting message in multiple parts depending on ids received in the request.
+```
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 4783
+;; flags: qr ; qd: 1 an: 14 au: 0 ad: 0 
+;; QUESTIONS:
+;;	m0n2-ORSXG5A=.historique.example.com., type = A, class = IN
+
+;; ANSWERS:
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	0.71.70.71
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	1.87.75.52
+m0n2-ORSXG5A=.historique.example.com..	300	IN	A	2.51.84.77
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	3.70.84.87
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	4.75.77.74
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	5.83.71.65
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	6.90.68.71
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	7.76.74.81
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	8.71.77.87
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	9.84.65.78
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	10.50.85.71
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	11.69.61.61
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	12.61.61.61
+m0n2-ORSXG5A=.historique.example.com.	300	IN	A	13.61.0.0
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+
+;; Message size: 0 bytes
+```
+
 ### Network HTTP
 
 
