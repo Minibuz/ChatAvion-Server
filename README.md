@@ -32,7 +32,7 @@ For example : *chat.example.com A 1.1.1.12*
 Clone the repository: git clone https://github.com/yourusername/spring-dns-http-server.git <br>
 Change directory: cd spring-dns-http-server <br>
 Build the project: mvn clean install <br>
-Run the server: java -jar target/spring-dns-http-server-0.0.1-SNAPSHOT.jar <br>
+Run the server: sudo java -jar target/spring-dns-http-server-0.0.1-SNAPSHOT.jar <br>
 The server will start and listen for incoming DNS and HTTP requests on ports 53 and 80 respectively. <br>
 An admin console is provided for managing the community. The console can be accessed directly from the application console.
 
@@ -141,6 +141,18 @@ Only one command is available in the console of the application.<br>
 The command **community** followed by a name creates a new community.<br>
 For example, " *community community* " will create a new community for every user to access named "community".<br>
 Those community needs to be recreated every time the server is restarted. But the history of message will be keep in the log file corresponding to the name of the community as "community.log".
+
+### Using the server
+If you are a server owner and want to start the server to let it run on a distant server, u can use the following commands :
+
+- ```sudo java -jar server-\*.\*.\*.jar``` is used to start the server. If u are already using a root account,
+u can remove the sudo.
+- ```screen -S xyz``` with xyz being the name of the screen u want to create. This command allow the user to start
+a screen to separate the logs of the server from the main screen. It also permits the server to run after leaving
+the communication such as ssh.
+- ```screen -r xyz``` with xyz being the name of the screen u want to create. This command allow the user to swap the
+current screen to xyz screen.
+While being on a screen, u can return to the main one using ctrl+a+d.<br>
 
 # License
 
