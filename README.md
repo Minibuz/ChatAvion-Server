@@ -95,13 +95,13 @@ ORSXG5A=.ORSXG5A=.25963-00-ORSXG5A=.message.example.com.	3600	IN	A	42.42.42.42
 Those request have a question formed as follows :<br>
 *communityBase32.usernameBase32.randomId-totalPartpartId-messagePartBase32.message.example.com*<br>
 In this question, we can see each part is a different element.<br>
-communityBase32 is the community the message is getting send on. The name of the community is transform in Base 32 for the request.<br>
-usernameBase32 is the username of the user sending the message. The username is transform in Base 32 for the request.<br>
+communityBase32 is the community the message is getting send on. The name of the community is transform in Base32 for the request.<br>
+usernameBase32 is the username of the user sending the message. The username is transform in Base32 for the request.<br>
 The last part is the message part. This part is composed of multiple subpart, each subpart is being split with '-'. 
 First is a random short generated in order to identify the message and recompose it. 
 The second part is composed of two numbers from 0 to 9. The first one is the number of total part of the message. The second one is the id of the part following the next '-'.
 When those two numbers are equals, it means that the whole message have been sent, the server can then decrypt and recompose the whole message before storing it in the community log.
-The third part is the message subpart encrypted in Base 32.
+The third part is the message subpart encrypted in Base32.
 
 Third type of request are the history request. Those are the most complex request as they involved splitting message in multiple parts depending on ids received in the request.
 ```
@@ -132,9 +132,77 @@ m0n2-ORSXG5A=.historique.example.com.	300	IN	A	13.61.0.0
 
 ;; Message size: 0 bytes
 ```
+Those request have a question formed as follows :<br>
+*m0n2-ORSXG5A=.historique.example.com* <br>
+The first part is composed of two subpart, the id of the message and the id of the part followed by '-' and the community name in Base32.
+The id *'m' number* with number being the id of the message the client is trying to retrieve.<br>
+The id *'n' number* with number being the id of the part of the message the client is trying to retrieve.<br>
+In the answers fields, we can see multiple records. Each of the start with an id from 0 in order for the
+client to recompose the message in the good order. Then the other byte are the part of the message from the history that
+has been transform to Base32 and separate byte by byte.
 
 ### Network HTTP
 
+#### Connexion
+```GET /community/communityName```<br>
+```curl -i -H 'Accept: application/json' http://localhost:80/community/test``` <br>
+
+**Response**
+```http request
+HTTP/1.1 200 
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Wed, 08 Mar 2023 13:49:37 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+
+1
+```
+
+#### Get history
+```GET /history/communityName/idStr```<br>
+```curl -i -H 'Accept: application/json' http://localhost:80/history/test/0``` <br>
+
+**Response**
+```http request
+HTTP/1.1 200 
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Wed, 08 Mar 2023 13:50:08 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+
+[
+  {
+    "id": 0,
+    "user": "User",
+    "message": "Message test 1"
+  },
+  {
+    "id": 1,
+    "user": "User",
+    "message": "Message test 2"
+  }
+]
+```
+
+#### Send message
+```POST /message/communityName``` <br>
+
+```POST http://localhost:80/message/test``` <br>
+```{"id":0,"user":"User","message":"Message"}``` <br>
+
+**Response**
+```http request
+HTTP/1.1 201 
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Wed, 08 Mar 2023 13:55:31 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+
+true
+```
 
 ### Admin console
 Only one command is available in the console of the application.<br>
@@ -156,8 +224,8 @@ While being on a screen, you can return to the main one using ctrl+a+d.<br>
 
 # License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENCE](LICENSE) for details.
 
 # Contact
 
-If you have any questions or comments about this project, please feel free to contact me at your.email@example.com.
+If you have any questions or comments about this project, please feel free to contact [me](https://github.com/minibuz/) or anyone who worked on the project.
