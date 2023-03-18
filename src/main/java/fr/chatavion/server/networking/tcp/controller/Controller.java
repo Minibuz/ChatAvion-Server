@@ -78,7 +78,7 @@ public class Controller {
         boolean result = communityInterface.isCommunityExisting(communityName);
 
         // Return the result
-        return new ResponseEntity<>(result ? communityInterface.lastMessageId(communityName) : -1, HttpStatus.OK);
+        return new ResponseEntity<>(result ? communityInterface.lastMessageId(communityName) : -2, HttpStatus.OK);
     }
 
     /**
