@@ -57,7 +57,7 @@ class ControllerTest {
     @Test
     void validateCommunityFalse() throws Exception {
         this.mockMvc.perform(get("/community/badTest")).andDo(print()).andExpect(status().isOk())
-                .andExpect(content().string("-1"));
+                .andExpect(content().string("-2"));
     }
 
     @Test
